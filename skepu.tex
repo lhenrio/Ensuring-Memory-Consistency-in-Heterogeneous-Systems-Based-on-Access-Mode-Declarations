@@ -1,0 +1,252 @@
+\section{Case study for overlapping array accesses: SkePU}
+
+Skeletons are pre-defined generic program building blocks
+that implement certain frequently occurring patterns of
+computation and dependences, for which efficient parallel
+or platform-specific implementations might be available.
+Skeletons can be parameterized in problem-specific'
+(usually, sequential) code to generate executable functions
+with parallel implementations that can be called like
+any handwritten implementation.
+
+SkePU \cite{Enmyren10,Ernstsson18} 
+is a C++ based skeleton programming framework for heterogeneous systems.
+It provides a number of general-purpose data-parallel skeletons
+(generalized map, reduce, mapreduce, stencil, scan) each of
+which has implementations (backends) for one and multiple CPU cores as
+well as CUDA and OpenCL backends for single and multiple GPUs.
+While it is possible to enforce a specific backend, and thus
+execution platform, for a skeleton call or even an entire program
+run, SkePU provides a tuning feature that automatically 
+decides at runtime,
+based on internal performance models, where to best execute a 
+skeleton call in order to optimize for time or energy. 
+All (non-scalar) operands passed into or out of skeleton calls must be
+SkePU data containers, which frame C++ datatypes;
+currently, extensions of STL \texttt{vector<...>}
+and a \texttt{matrix} data type are provided.
+Using iterators, SkePU skeleton calls can work on dense sub-arrays
+defined by arbitrary index intervals.
+The SkePU data containers, improved in their second generation for
+CUDA devices \cite{Dastgeer-IJPP15}, intercept all single-element
+or bulk accesses to the encapsulated C++ arrays and
+perform internally a MSI-coherent software caching of
+accessed element subsets in non-shared device memories, 
+using lazy data copying to avoid unnecessary data moves.
+They also transparently optimize the memory management
+by lazy deallocation of invalidated device copies of element
+subsets and reusing such space of matching size for new copies.
+A smart copying technique locates, for each (sub)array access, the 
+subranges with valid copies nearest to the accessing device
+and thereby optimizes data transfer times additionally,
+also using direct device-to-device copying where applicable.
+
+
+\vspace{1.4mm}
+\noindent
+{\em Implementation notes}
+SkePU\footnote{http://www.ida.liu.se/labs/pelab/skepu} 
+is organized as a C++ source-to-source precompiler based on 
+LLVM clang and an include library.
+The part of the SkePU source code dealing with coherence in SkePU 
+is very large, over 1500 lines of C++ code in total that are 
+spread over several source files. Hence, 
+the coherence-relevant code of SkePU is much less
+localized and it is also more complex than that of VectorPU
+because SkePU works with a more complex coherence protocol
+and the device type and number is not hardcoded but can be 
+arbitrarily large (VectorPU implicitly assumes 1 CPU and 1 GPU).
+% Some code occurs many times, e.g. in different
+% access operators or for different container initializers.
+%
+% Part of the coherence code for overlapping array accesses
+% is not nicely written (lack of comments, some warning comments
+% about unfixed or untested corner cases)
+% but otherwise seems to make sense to me.
+
+Each SkePU data container stores all its elements in main memory,
+referred to as the \emph{main copy} and
+(part of) elements accessed in skeleton calls might also reside
+in one or separate device memories, referred to as \emph{device copies}.
+The container itself resides in main memory as all decisions
+about operand data movement etc.\ before and after a skeleton call 
+are made on CPU, regardless where the skeleton call will execute, 
+hence container metadata such as the main copy coherence state 
+and those of existing device copies are stored in main memory (only).
+
+The coherence state of the main copy (in main memory) 
+is represented by 2 boolean flags: 
+\verb+m_valid+ (initialized to true in container constructors) and 
+\verb+_noValidDeviceCopy+ (initalized to true).
+
+Device copies are identified by pairs consisting of the
+address of the first element accessed and the number of
+elements accessed. 
+Multiple device copies of the same array can overlap 
+even on same device (if they are readonly)
+and multiple copies can exist even with write access if their element ranges do not overlap.
+
+Different from the main copy, the current state of device copies 
+is \emph{implicitly} modeled by their membership in lists
+that are maintained in the container in main memory:
+\begin{itemize}
+\item list of valid device copies on each device
+\item list of modified (valid) device copies on each device with main copy not updated yet
+\end{itemize}
+
+The coherence protocol used is a variant of MSI, with 3 states for the main copy:
+\begin{itemize}
+\item M: exclusive owning for reading and writing by CPU.
+         Flags \verb+m_valid==true+ and \verb+m_noValidDeviceCopy==true+.
+\item S: shared for multiple readers.  
+         Flags \verb+m_valid==true+ and 
+               \verb+m_noValidDeviceCopy==false+.
+\item I: invalid in main memory.  Flag \verb+m_valid==false+.
+\end{itemize}
+
+Interestingly, it is not explicitly represented if \emph{part} of 
+the main copy is invalid but another part still valid. 
+This is implicit by having the still valid parts not
+being members of the list of modified device copies.
+
+% Code snippets: it should maybe not exceed one page.
+% Some manual "inlining" and simplification of the source code
+% will be necessary to make it readable.
+
+Due to space limitations we can here only display a few selected 
+snippets of the SkePU container coherence code to illustrate the mechanism.
+Figures \ref{fig:skepucoherence1}--\ref{fig:skepucoherence3} show small
+samples of (simplified) coherence-related
+code from files \texttt{vector.hpp}, %\texttt{vector/vector.inl} 
+ \texttt{vector/vector\_cu.inl} and \texttt{backend/device\_mem\_pointer\_cu}.
+
+\begin{figure}
+\begin{small}
+\begin{verbatim}
+// from vector.hpp:
+
+  template <typename T>
+  class Vector
+  {   ...
+    public:
+      ...
+    private: //-- Data --//
+      T *m_data;
+      mutable bool m_valid; // keep track whether main copy is valid or not
+      size_type m_capacity;
+      size_type m_size;
+      bool m_deallocEnabled;
+      mutable bool m_noValidDeviceCopy;
+      ...
+      mutable std::map<std::pair<T*, size_type>, device_pointer_type_cu>
+                 m_deviceMemPointers_CU[MAX_GPU_DEVICES];
+      // list of copies changed on device but not synced with host memory:
+      mutable std::map<std::pair<T*, size_type>, device_pointer_type_cu>
+                 m_deviceMemPointers_Modified_CU[MAX_GPU_DEVICES];
+     ...
+  } ...
+\end{verbatim}
+\end{small}
+
+\vspace{-3mm}
+\caption{\label{fig:skepucoherence1}Selected coherence code from the SkePU vector container implementation.}
+\end{figure}
+  
+\begin{figure}
+\begin{small}
+\begin{verbatim}
+// from vector_cu.inl:
+
+  // function updateDevice_CU manages container state for
+  // read and write accesses on a CUDA device:
+  ...
+  else {
+      bool noModifiedDevCopy = true;
+      // Check all overlapping copies from all devices as invalid:
+      for (int devID = 0; devID < MAX_GPU_DEVICES; ++devID) {
+         if (m_deviceMemPointers_Modified_CU[devID].empty() == false) {
+            noModifiedDevCopy = false; break;
+      }  }
+      if(noModifiedDevCopy)  m_valid = true;
+      else                   m_valid = false;
+   }
+   ...
+\end{verbatim}
+\end{small}
+
+\vspace*{-3mm}
+\caption{\label{fig:skepucoherence2}Selected coherence code from the SkePU vector container implementation.}
+\end{figure}
+  
+\begin{figure}
+% // from device_mem_pointer_cu.h:
+%
+%  // Checks whether the copy passed as argument has a subset of elements range
+%  // to the one that object points to:
+%  template <typename T>
+%  bool DeviceMemPointer_CU<T>::doOverlapAndCoverFully (
+%                       DeviceMemPointer_CU<T> *otherCopy )
+%  { if (m_hostDataPointer <= otherCopy->m_hostDataPointer
+%         && (m_hostDataPointer + m_numElements)
+%             >= (otherCopy->m_hostDataPointer + otherCopy->m_numElements) )
+%        return true;
+%      return false;
+% }
+
+%    // returns true if there exist any range (that needs to be written) that
+%   // is overlapping to the otherCopy:
+%   template <typename T>
+%   bool DeviceMemPointer_CU<T>::doCopiesOverlap ( DeviceMemPointer_CU<T> *otherCopy,
+%                                                  bool oneUnitCheck)
+%   {
+%     if (oneUnitCheck)
+%        assert(m_numOfRanges == 1 && otherCopy->m_numOfRanges == 1);
+%     if ...
+
+\begin{small}
+\begin{verbatim}
+// from device_mem_pointer_cu.h:
+   // creating new device copy: allocate amount of space in device memory
+   // and store a pointer to some data in host memory.
+   ...
+   /*! ranges that should be checked for overlap with other copies */
+   m_rangesToCompare[m_numOfRanges++] =
+                     std::make_pair( m_hostDataPointer, m_numElements );
+   m_deviceDataHasChanged = false;
+   ...
+ 
+   // returns true if there exists any range (that needs to be written) that
+   // is overlapping to the otherCopy:
+   template <typename T>
+   bool DeviceMemPointer_CU<T>::doCopiesOverlap ( DeviceMemPointer_CU<T> *otherCopy, ...)
+   { ...
+     if (m_numOfRanges < 1)
+        return false;
+     for(size_t i=0; i<m_numOfRanges; ++i) {
+        T *hostDataPointer = m_rangesToCompare[i].first;
+        size_t numElements = m_rangesToCompare[i].second;
+        if (hostDataPointer >= otherCopy->m_hostDataPointer
+          && hostDataPointer < otherCopy->m_hostDataPointer + otherCopy->m_numElements)
+          return true;
+       if (otherCopy->m_hostDataPointer >= hostDataPointer
+         && otherCopy->m_hostDataPointer < hostDataPointer + numElements )
+           return true;
+       }
+     return false;
+   }
+   // ... for further overlap test functions see device_mem_pointer_cu.h
+\end{verbatim}
+\end{small}
+%
+%   // Checks whether there exists some overlap between elements range covered by current copy to the one passed as argument.
+%   template <typename T>
+%   bool DeviceMemPointer_CU<T>::doRangeOverlap( T *hostDataPointer, size_t numElements)
+%   {
+%     if (m_hostDataPointer + m_numElements <= hostDataPointer ) return false;
+%     if (hostDataPointer + numElements <= m_hostDataPointer ) return false;
+%     return true;
+%   }
+%   ...
+\caption{\label{fig:skepucoherence3}Selected coherence code from the SkePU vector container implementation.}
+\end{figure}
+

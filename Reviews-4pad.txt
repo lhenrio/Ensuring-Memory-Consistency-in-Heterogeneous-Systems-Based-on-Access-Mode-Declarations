@@ -1,0 +1,112 @@
+----------------------- REVIEW 1 ---------------------
+PAPER: 2
+TITLE: Ensuring Memory Consistency in Heterogeneous Systems Based on Access Mode  Declarations
+AUTHORS: Ludovic Henrio, Christoph Kessler and Lu Li
+
+Overall evaluation: 2 (accept)
+
+----------- Overall evaluation -----------
+The paper introduces a core calculus for memory access in a CPU/GPU heterogeneous system. It then introuces higher-level operations that model those of an existing programming framework for heterogeneous CPU/GPU systems in C++ (VectorPU). Finally, it shows safety properties of the higher-level calculus based on the given semantics for the higher- and lower-level ones. 
+
+The contribution sets basis towards verification of consistency in heterogeneous CPU/GPU systems. The conclusions may include more details on concrete plans towards exploitation of the results to verify code. On the other hand, the paper provides a basis for a clearer and rigorous understanding of the behaviour and properties of such systems by humans. This is, in itself, a valuable contribution.
+
+Although I am not an expert, the results seem convincing. I have three concerns that are easily addressable. 
+
+> First, Property 1, in the way it is formulated, would not apply to terms like E x;S. There is no semantic rule to decompose S into its sequential parts. It would be better to write (S;S’, \sigma) or add the aforementioned rule. 
+
+XXLUDOXX Indeed added ;S' in the conclusions
+
+> Second, the statement of Property 2 seems incomplete: It is impossible to reach an unsafe state **from a safe one**. 
+XXLUDOXX Indeed, I wrote only about the initial state because I think this is the interesting part
+
+
+> Third, I do not understand rule REM-INVALID in figure 2: shouldn’t it be (X,I) in the premise?
+XXLUDOXX Indeed, OOPS
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 2
+TITLE: Ensuring Memory Consistency in Heterogeneous Systems Based on Access Mode  Declarations
+AUTHORS: Ludovic Henrio, Christoph Kessler and Lu Li
+
+Overall evaluation: 2 (accept)
+
+----------- Overall evaluation -----------
+Summary:
+The objective of this paper is to verify memory consistency of the CPU-GPU framework called VectorPU. VectorPU abstracts memory operations for variables that used shared by both CPU and GPU computations. Unlike CUDA-like programming that requires the user to explicitly to write the code for transferring the variables data between CPU and GPU, VectorPU requires only the annotation on how those variables could be accessed and on what device. VectorPU reads those annotations and translate the code into the low level error-free code. The absence of errors is defined terms of memory consistency between CPU and GPU data, where neither CPU nor GPU operate on old data. The paper presents the formalism that the authors use to prove the translation to the low-level code ensures the preservation on the memory consistency property by showing unreachability of memory inconsistent configurations.
+
+Review:
+Overall the paper is well written and has good logical progression that despite the introduced formalism made this paper comfortable to read. The motivation is well established and the more complicated proofs are built on the basic ones. But sometimes the authors use vocabulary that was not previously defined.
+ 
+> For example, in Property 1 the authors use “a unification” property, which has not been defined, and I was not able to infer it from the preceding paragraph. This should be defined as a relation and used in the property 1 definition. 
+XXLUDOXX added footnote
+
+Property 2 has name “Safety” but gives definition of an unsafe state – make it consistent.
+If you claim the similarity between your technique and the abstract interpretation approach [5] then describe how they are related, i.e., what is the abstract domain and so on. Otherwise you might want to omit it this comparison.
+XXLUDOXX it was +/- explained but I removed the ref to please the reviewer
+
+Fig. 2 – check Remote Effect rule is the dominator S’ becomes S – perhaps a typo.
+XXLUDOXX Indeed, OOPS
+
+> On p.5 when you define the syntax of an access mode M – what disjoint variables do you refer for M and M’ – abstract variables or concrete variables?
+XXXLUDOXXX I put variables in M and M'
+
+> On p.5 in the beginning of Theorem 1 proof the second \sigma(x) should be (I,V) – perhaps a typo.
+XXLUDOXX Indeed, OOPS
+
+> P.7 Theorems 2 – use the previously defined term – an unsafe configuration rather than an awkward “stuck configuration”, which has not been defined. Check its proof – you have couple places where there is no space between a symbol and a word, e.g., “$x$that declared” and “$Push$instruciton”.
+XXXLUDOXXX NO stuck is stuck it is not invalid, ok for the typos
+
+> Too many phrases in parenthesis, which makes reading a bit interrupted. Please remove them to incorporate in the actual sentence.
+XXXLUDOXXX removed ~80% of the parentheses
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 2
+TITLE: Ensuring Memory Consistency in Heterogeneous Systems Based on Access Mode  Declarations
+AUTHORS: Ludovic Henrio, Christoph Kessler and Lu Li
+
+Overall evaluation: 2 (accept)
+
+----------- Overall evaluation -----------
+This paper presents the proof of correctness of the cache coherence system
+of VectorPU, a C++ library to program CPU-GPU heterogeneous systems.
+
+After an introduction that exposes the context of this work, the second
+section presents VectorPU and its cache coherency system in more details.
+The section 3 presents the formalization of the different operation that
+can lead or not to a memory transfer and the representation of the validity
+of a memory location, as well as the proof of different coherence
+properties. Section 4 gives some related work and Section 5 concludes.
+
+The paper is well written and very clear. The approach is quite simple and
+yet powerful enough to prove important properties of coherence.
+
+I still have some remarks.
+
+> In section 2, the annotation system is presented. While I understand the
+meaning of annotation for function definitions, I am not perfectly sure to
+understand what it means for function calls. Are the annotation checked
+against the definition? Or is this considered as an assumption of the
+programmer?
+TODO
+
+> In section 3, the generic binary operator is supposed to always succeed.
+Could you give an intuition about why it is safe?
+XXLUDOXX added a (not much convincing) footnote
+
+> In Fig.2, the premise of REM-Invalid rule contains a typo
+(should be X,I).
+XXLUDOXX Indeed, OOPS
+
+> In the proof of Theorem 1, I think there is an error with the noticed
+properties (sigma(x) = (V,I) appears two times).
+XXLUDOXX Indeed, OOPS
+
+Typos:
+
+Sec.2 p3 "its efficiency is on part"
+XSec.3 p5 "the effect on"
+XSec.3 p5 "no transfer is" has ?
+XSec.3 p6 "to the fact"
+XTheorem 2 : RW x# appears two times
+XSec.3 p7 "xthat" missing space
+XSec.3 p7 "Pushinstruction" missing space

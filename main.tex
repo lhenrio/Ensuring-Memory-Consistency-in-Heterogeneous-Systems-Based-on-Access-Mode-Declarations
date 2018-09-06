@@ -1,0 +1,1044 @@
+%% 
+%% Copyright 2007-2018 Elsevier Ltd
+%% 
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+
+%% Template article for Elsevier's document class `elsarticle'
+%% with numbered style bibliographic references
+%% SP 2008/03/01
+%%
+%% 
+%%
+%% $Id: elsarticle-template-num.tex 64 2013-05-15 12:23:51Z rishi $
+%%
+%%
+\documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{mathpartir,color}
+\usepackage{stmaryrd}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO:#1]}}}
+\newcommand{\symb}[1]{\textit{#1}} 
+\newcommand{\noop}{\symb{Noop}}
+\newcommand{\Push}{\symb{Push}}
+\newcommand{\Pull}{\symb{Pull}}
+\newcommand{\while}{\symb{While}}
+\newcommand{\cond}{\symb{cond}}
+\DeclareMathOperator{\vars}{vars}
+\newcommand{\isvalid}{\symb{isValid}}
+\newcommand{\isremvalid}{\symb{remIsValid}}
+\newcommand{\rem}[1]{\symb{rem}(#1)}
+\newcommand{\IF}[3]{\symb{if}\,(#1)~#2~\symb{else}~#3 }
+\newcommand{\feval}[2]{\llbracket#1\rrbracket_{#2}}
+\newcommand{\True}{{\tt True}}						
+\newcommand{\False}{{\tt False}}				
+\newcommand{\transl}[1]{\llbracket#1\rrbracket}
+\newtheorem{definition}{Definition}
+\newtheorem{Property}{Property}
+\newtheorem{Theorem}{Theorem}
+\newcommand{\abs}[1]{#1^\#}
+\newcommand{\AM}{\mathcal{M}}
+\newcommand{\Prog}{\mathcal{P}}
+\usepackage{etoolbox}
+\DeclareMathOperator{\range}{range}
+\DeclareMathOperator{\dom}{dom}
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+\usepackage{lineno}
+
+\journal{Journal of Logical and Algebraic Methods in Programming}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \address{Address\fnref{label3}}
+%% \fntext[label3]{}
+
+\title{Ensuring Memory Consistency in Heterogeneous Systems Based on Access Mode 
+Declarations }
+
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \address[label1]{}
+%% \address[label2]{}
+\author[i3s]{Ludovic Henrio\corref{cor1}}
+\ead{ludovic.henrio@cnrs.fr}
+\author[liu]{Christoph Kessler}
+\ead{christoph.kessler@liu.se}
+\author[liu]{Lu Li}
+\ead{lu.li@liu.se}
+\cortext[cor1]{Corresponding author}
+
+\address[i3s]{Universit\'e~C\^ote~d'Azur, CNRS, I3S, France.}
+\address[liu]{University of Linköping, Sweden}
+
+\begin{abstract}
+Running a program on disjoint memory spaces requires to address memory consistency 
+issues and to perform  transfers so that the program always accesses  the right 
+data. Several approaches exist to ensure the consistency of the memory accessed,  we 
+are interested here in the verification of a declarative approach where each component of 
+a computation is annotated with an access mode declaring which part of the memory is 
+read or written by the component. The programming framework uses the component
+annotations to guarantee the validity of the memory accesses. This is the mechanism used in VectorPU, a C++ library for programming CPU-GPU heterogeneous  systems 
+and this article proves the correctness of the software cache-coherence mechanism used in 
+the library. Beyond the scope of VectorPU, this article can be considered as a simple 
+and effective formalisation of memory consistency mechanisms based on the explicit 
+declaration of the effect of each component on each memory space.
+
+\end{abstract}
+
+\begin{keyword}
+%% keywords here, in the form: keyword \sep keyword
+Memory consistency \sep CPU-GPU heterogeneous systems \sep  
+data transfer \sep  software caching \sep  cache coherence 
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+
+\input{vectorpu-intro.tex}
+
+\section{Formalization}\label{sec:Formal}
+
+In this section we provide a minimal calculus to reason on the memory operations that can 
+exist in a framework that deals with memory consistency like VectorPU. We first define a 
+set of effects operations can have on the consistency of the memory. Then we define a 
+small calculus expressing different memory accesses and their composition into complex 
+procedures. Finally, we express VectorPU operations as higher-level statements that can 
+be translated  into the core calculus presented before, and show that if all memory 
+accesses are annotated correctly through VectorPU annotations the program cannot try to 
+access an invalid data and the memory spaces are put in coherence when needed. We also 
+show that VectorPU tracks the validity status of the memory adequately. In this 
+section we abstract away the values stored in memory and we 
+do not deal with any form of aliasing. A more precise analysis of effects and aliasing is 
+out of the scope of this paper, it could be for example inspired 
+from~\cite{Nielson1999}.
+We place ourself in a simplified setting where each variable is hosted in exactly two 
+memory locations, e.g.\ a CPU (main) memory and a GPU memory location, but the work could be extended to multiple memory 
+locations without any major difficulty.
+
+\subsection{An effect system for consistency between memory locations}
+We start from a simple effect system, it expresses the effect of writing or reading a 
+memory 
+location on the consistency status of the memory. Each location is either in  
+\textit{valid} state when it holds a usable data 
+or \textit{invalid} state when the value at the location is not valid anymore.
+
+We express five  operations: reading, writing, 
+\Push\ for uploading the local memory location into the other one, and \Pull\ for the 
+contrary. \noop\ is an operation that does nothing.
+ \[E::= \Push ~|~ \Pull ~|~ r~|~ w ~|~ %rw ~|~ 
+\noop\]
+
+The effect of these operations express their requirements and effects on a single memory 
+location. We 
+express 
+below the semantics of each of the operations on the consistency status of the concerned 
+memory location. 
+%The status memory location 
+The \textit{memory status of a variable}
+is a pair of the status of its locations, 
+where each status is 
+either $V$ for valid or $I$ for invalid. The first element is the status of the local 
+memory, and the second one is the status of the remote memory. For example, for a 
+program running on a CPU while the remote memory is a GPU, a status $(V,I)$ means that 
+the memory is valid and can be read on the CPU, but is invalid on the GPU and should be 
+transferred before being usable there.
+
+Each operation has a signature in the sense that it may require a certain memory status 
+and 
+will produce another memory status. The signature of each operation is expressed below.
+We use
+variables $X$, $Y$, $Z$, $T$ that are considered as universally quantified in each rule. 
+They can 
+be instantiated with either $V$ or $I$.
+\begin{mathpar}
+\Push: (V,X)\mapsto (V,V)
+
+\Pull: (X,V)\mapsto (V,V)
+
+r: (V,X)\mapsto (V,X)
+
+%rw: (V,X)\mapsto (V,I)
+
+w: (X,Y)\mapsto (V,I)
+
+\noop: (X,Y)\mapsto (X,Y)
+    \end{mathpar}
+
+These signatures are effects  expressing that
+$r$ is a reading operation requiring validity of data and ensuring not to modify it, 
+the distant status is unchanged; $w$ 
+is a  writing operation that modifies data locally but do not require validity, they 
+invalidate the remote memory.  \Push\ uploads the local memory and thus makes valid the 
+distant memory; 
+it requires that the data is locally valid, and \Pull\ is the symmetrical operation.
+
+An additional operation could be defined: 
+ an 
+$rw$ operation would represent a read and/or write access, it would both require data 
+validity and invalidate 
+remote status: $(V,X)\mapsto (V,I)$. This operation is however not needed here.
+
+\subsection{A language for modelling consistency and effects}\label{sec-core}
+We now create a core calculus to be able to reason on programs involving sequences of 
+effects on different memory locations. $x,y$ range over variables and we introduce  statements manipulating 
+variables. We use sequence and simple loops and conditionals. 
+Operations with effects 
+now apply to a variable;  the $\rem{E~x}$  is a remote operation 
+ on the remote memory. For example, a GPU procedure 
+writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem{r~y}$. 
+Statements $S$ are defined as:
+
+{\small \[S::=E~x~|~\rem{E~x}~|~S;S'~|~\while(\cond) S ~|~ \IF{\cond}{S}{S'}\]}
+\noindent where $E$ $x$ denotes some effect $E$ on variable $x$, with $E\in \{r,$ $w,$  
+$\Push,$ $\Pull,$ $\noop\}$.
+
+We are  interested  in conditionals dealing 
+with the validity status of the variables. Other conditionals  are expressed as a generic 
+binary operator $\oplus$ but other operators with different arities could be added as 
+well:
+\[\cond::=\isvalid~x~|~\isremvalid~x~|~x\oplus y\]
+%$\oplus$ replaces operations on values; we are not interested in evaluating them ; only 
+%to show that while can use values (perhaps to be improved)
+\noindent where \textit{isValid} $x$ and \textit{remIsValid} $x$ denote checks of the validity status flag of the local and remote location of $x$, respectively.
+
+We now define a small step operational semantics for our core calculus.
+It relies on the validity status of variables, recorded in a store $\sigma$ mapping 
+variable names to validity pairs. Semantics is written as a transition relation between 
+pairs consisting of a statement and a store: $(S,\sigma)$. The sequencing operator $;$ is associative with \noop\ as a neutral element. 
+Consequently each non-empty sequence of instruction can be rewritten as $S;S'$ where $S$ 
+is neither a 
+sequence nor \noop. $\sigma[x\mapsto (X,Y)]$ is the update operation on maps. 
+%The swap 
+%operation on 
+%pairs is extended to store (it swaps the value associated to each variable)
+
+
+\begin{figure*}[tb]
+\begin{mathpar}
+\inferrule[valid]
+{\sigma(x)=(V,X)}
+{\feval{\isvalid~x}{\sigma}=\True}
+
+\inferrule[invalid]
+{\sigma(x)=(I,X)}
+{\feval{\isvalid~x}{\sigma}=\False}
+
+\inferrule[rem-valid]
+{\sigma(x)=(X,V)}
+{\feval{\isremvalid~x}{\sigma}=\True}
+
+\inferrule[rem-invalid]
+{\sigma(x)=(X,I)}
+{\feval{\isremvalid~x}{\sigma}=\False}
+
+\inferrule[Effect]
+{\sigma(x)=(X,Y) \\ E:  (X,Y)\mapsto (Z,T)  }
+{(E~x;S,\sigma)\to (S,\sigma[x\mapsto(Z,T)])}
+
+
+\inferrule[Remote Effect]
+{\sigma(x)=(X,Y) \\ E:  (Y,X)\mapsto (Z,T) }
+{(\rem{E~x};S,\sigma)\to (S,\sigma[x\mapsto(T,Z)])}
+
+\inferrule[While-True]
+{\feval{\cond}{\sigma} }
+{(\while(\cond) S;S',\sigma)\to (S;\while(\cond) S;S',\sigma)}
+
+\inferrule[While-False]
+{\neg\feval{\cond}{\sigma} }
+{(\while(\cond) S;S',\sigma)\to (S',\sigma)}
+
+\inferrule[IF-True]
+{\feval{\cond}{\sigma} }
+{((\IF\cond S S');S'',\sigma)\to (S;S'',\sigma)}
+
+\inferrule[IF-False]
+{\neg\feval{\cond}{\sigma} }
+{((\IF\cond S S');S'',\sigma)\to (S';S'',\sigma)}
+
+    \end{mathpar}
+\caption{Operational semantics of validity status.}\label{fig:Opsem}
+\end{figure*}
+
+The semantics is presented in Figure~\ref{fig:Opsem}. Like in the previous section, we 
+use validity variables $X$, $Y$, $Z$, $T$ 
+that are universally quantified in each rule.
+ The first %three
+ four rules present the 
+evaluation of conditional statements, we suppose additional rules exist for evaluating 
+$\oplus$\footnote{We are only interested in cache coherence properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect on a variable $x$ updating the validity store, 
+and the \textsc{Remote Effect} rule applies an effect occurring on the distant memory, it 
+applies the symmetric of the effect to the variable. Note that \Push\ is the symmetric of 
+\Pull\ and we could have removed one of those two operations without loss of generality. 
+The last rules are standard ones for \symb{if} and \symb{while} statements.
+
+\noindent\emph{Initial state:} To evaluate a sequence of statements $S$ using the 
+variables 
+$\vars(S)$, we put it in a configuration with 
+an initial 
+store where data is hosted on the CPU and all variables are initially mapped to $(V,I)$: 
+$\sigma_0=(x\mapsto 
+(V,I))^{x\in \vars(S)}$.
+
+
+%for the moment 2 address spaces, see if we need many of them
+
+A configuration is \emph{reachable} if it is possible to obtain this configuration 
+starting from the initial configuration and applying any number of reductions: 
+$(S,\sigma)$ is reachable if $(S,\sigma_0)\to^*(S',\sigma)$ where $\to^*$ is the 
+reflexive 
+transitive closure of $\to$. We write $(S,\sigma)\not\to $ and say that the configuration 
+is \emph{stuck} if no reduction rule can be 
+applied on $(S,\sigma)$.
+\begin{Property}[Progress]\label{prop:stuck}
+ A configuration is stuck if the validity status of the accessed variable is 
+incompatible with the effect to be applied\footnote{We say that there is no unification  between $X$ and $Y$ if one of the two variables must have the value $V$, and the other one the value $I$. This relation is extended to pairs of variables.}:
+\[\begin{array}{@{}l@{}}
+(S,\sigma)\not\to\ \iff\\
+ \begin{array}[t]{@{}l@{}}
+S=E~x;S' \land \sigma(x)=(X,Y) 
+							\land E:  (X',Y')\mapsto (Z,T)\ 
+						\\\qquad 	\land~\text{there is no unification  between } 
+							(X,Y)   
+							\text{ and } (X',Y')\\
+\lor S\!=\!\rem{E~x};S' \land \sigma(x)\!=\!(X,Y) 
+							\land E:  (X',Y')\!\mapsto\! (Z,T)\ 
+							\\\qquad \land~\text{there is no unification  between } 
+							(X,Y)   
+							\text{ and } (Y',X')		
+\end{array}
+\end{array}\]
+Note that this supposes that $\oplus$ always succeeds.
+\end{Property}
+\begin{proof}[Proof sketch]
+By case analysis on the first statement of $S$, there is always 
+one rule applicable provided the premises of the rule can be evaluated.
+In the case of the last four rules this requires the evaluation of \cond. If $\oplus$ 
+always succeeds then \cond\ can always be 
+evaluated. The only case remaining is if there is no unification possible between the 
+effect of an operation and the current validity status of the affected variable, this 
+concerns the rule \textsc{Effect} and \textsc{Remote Effect} and corresponds to the two 
+cases expressed in the theorem.
+\end{proof}
+
+
+\begin{Property}[Safety]\label{prop:safe}
+A state is said to be \emph{unsafe} if at least one variable is mapped to 
+$(I,I)$.
+It is impossible to reach an unsafe state from the initial state.
+\end{Property}
+\begin{proof}[Proof sketch] 
+Unsafe states are avoided  because of the effects of operations: 
+only effect rules modify the store and no effect can reach $(I,I)$, except 
+\noop\ starting from $(I,I)$.
+\end{proof}
+
+\noindent
+   \emph{Example:} 
+    $w x;\rem{r~x}$ cannot be fully evaluated. Indeed, $(w x;\rem{r~x},(x\mapsto 
+    (V,I)))\to (\rem{r~x},(x\mapsto (V,I)))$, but  $\rem{r~x}$ requires that $x$ is 
+    mapped to $(X,V)$ for some $X$ which is not the case.
+However if we add a \Push\ operation to ensure the validity of the read memory the 
+program $w~x;Push;\rem{r~x}$ can be reduced:\\
+$(w x;\rem{r~x},(x\mapsto (V,I)))\\~\qquad\to (\Push;\rem{r~x},(x\mapsto 
+(V,I)))\\~\qquad\to 
+(\rem{r~x},(x\mapsto (V,V)))\to (\noop,(x\mapsto (V,V)))$
+
+%\subsection{Protecting Memory Accesses}
+%We now define protected operations as macros that can be compiled into the core 
+%calculus. 
+%The objective of this section is to show that if each memory access is protected, i.e.\ 
+%if 
+%a program only contains protected effects, and no direct memory effect, then the program 
+%executes safely without getting stuck in a configuration. We propose an extended 
+%language 
+%with the following syntax:
+%\[S'=S~|~R~x~|~W~x~|~RW~x|~\rem {R~x}~|~\rem {W~x}~|~\rem {RW~x}\]
+%For each memory effect, we now have a protected access; for example, $R~x$ denotes a 
+%protected reading operation that ensures that the validity status is correct before 
+%performing the read. We have protected local accesses and protected accesses on the 
+%distant memory. Similarly to the VectorPU library, the protected accesses can be 
+%considered as macros and the programs of the extended syntax can be translated into the 
+%core syntax as follows:
+%\begin{mathpar}
+%\transl{R~x}=(\IF{\isvalid~x}{\noop}{\Pull~x});r~x
+%
+%\transl{\rem {R~x}}=(\IF{\isremvalid~x}{\noop}{\Push~x});\rem{r~x}
+%
+%\transl{RW~x}=(\IF{\isvalid~x}{\noop}{\Pull~x});rw~x
+%
+%\transl{\rem{RW~x}}=(\IF{\isremvalid~x}{\noop}{\Push~x});\rem{rw~x}
+%
+%\transl{W~x}= w~x
+%
+%\transl{\rem{W~x}}= \rem{w~x}
+%\end{mathpar}
+%This encoding corresponds  to the macros instantiated in VectorPU except that VectorPU 
+%additionally tracks the effects, and this is unnecessary here because our semantics is 
+%tracking the effect. Note that it is easy to check that VectorPU tracks the effects in 
+%the same way as our semantics does. These translation rules  perform \Push\ or 
+%\Pull\ operations in order to ensure that the memory is in a correct validity status for 
+%the read or write operation to be performed.
+%
+%\begin{Theorem}[Protecting operations ensures progress]
+%If a program $S'$ is written with only  protected operations, i.e. no $r$, $w$, $rw$, 
+%$\Push$ or $\Pull$, then its execution cannot reach a stuck configuration.
+%\end{Theorem}
+%
+%\begin{proof}[Proof sketch] By Property~\ref{prop:stuck}, it is sufficient to prove that 
+%unification on the validity status is always possible, in other words, if a program has 
+%only protected operations then this unification is always possible. 
+%
+%This is done by case analysis of the effect applied in the translated program, and 
+%showing that in each case the effect rule can be applied.
+%Take the example of \Pull. \Pull\ only appears upon $R~x$ or $RW~x$ and when  
+%$\isvalid~x$ is 
+%false. In this case $\sigma(x)=(I,V)$ by property~\ref{prop:safe}. Consequently \Pull\ 
+%is 
+%not stuck.
+%Now considering the effect $r$, $r~x$ can only be obtained by translation of $R~x$. 
+%Consequently, $r~x$ appears necessarily after a conditional \Pull, thus when we reach 
+%$r~x$ we necessarily have $\sigma(x)=(V,I)$ or 
+%$(V,V)$ (by a trivial case analysis of the possible validity status of $x$ before the 
+%\Pull). 
+%Other cases are similar.
+%\end{proof}
+
+
+\subsection{Declaring access modes and adding an abstraction layer}
+The calculus defined above only considers simple memory locations and directly manipulates 
+them.
+But VectorPU and  similar libraries manipulate structures 
+representing the memory. For example, VectorPU vectors act as an
+ abstract representation of a set of memory 
+locations. In this section, we add a declaration and abstraction layer to the calculus to 
+represent the access mode declarations that will trigger data transfers according to the 
+consistency mechanism. 
+This abstraction layer is also a necessary first step to the modelling of array 
+structures that we will present in Section~\ref{sec-arrays}. Indeed, in array structures, 
+the 
+validity status of the array is abstracted away by a single validity status pair. Then 
+%approximations inspired from classical abstract interpretation techniques~\cite{Cous77} 
+a dynamic abstraction of the consistency status of the memory can be used.
+%can be used except that the abstract view is computed dynamically but must stay 
+%consistent with the validity status of the real memory.
+More technically, the abstraction and declaration layer relies on two principles:
+\begin{itemize}
+\item Each variable $x$ has an abstract variable $\abs x$ that represents it. In this 
+section there is 
+a single variable for each representative, but when we deal with arrays we will 
+have a single representative for the whole array.
+\item It is safe to ``forget'' that one memory space holds a valid copy of the data if 
+the other memory space has a valid one. In other words, $(V,I)$ (resp. $(I,V)$) is a safe 
+abstraction of $(V,V)$ and we denote $(V,I)\leq (V,V)$ (resp. $(I,V)\leq (V,V)$). Of 
+course, we have $(X,Y)\leq (X,Y)$ for all $X$ and $Y$.
+\end{itemize}
+
+\paragraph{Syntax}
+We now define access mode declarations:\\[-3.3ex]
+\begin{align*}
+\AM&::=R\ \abs x \,|\, W\ \abs x \,|\, RW\ \abs x \,|\, \\
+&~\rem{R\ \abs x} \,|\,\rem{W\ \abs x} \,|\,\rem{RW\ \abs x} \,|\, \\
+&~ \AM \land \AM' \quad \text{(where variables in $\AM$ and $\AM'$ are disjoint)}
+\end{align*}
+
+These access modes declare the kind of access (read $R$, write $W$, or read and/or write 
+$RW$) that 
+can be performed on the variable $x$ represented by $\abs x$. In a set 
+of access mode declarations the same variable cannot appear twice. There exist declared 
+access modes for  local accesses and for  the 
+remote memory space.
+
+% added "calls to" - one could even use the term "components" from Sect. 2
+A program is a sequence of calls to functions or components (i.e., statements accessing 
+only real variables) 
+each protected by an access 
+mode declaration:
+\[\Prog::=\AM_1\{S_1\};\AM_2\{S_2\};\ldots\]
+We write that $S\in S'$ if $S$ is one statement inside $S'$ (i.e. $S$ is a sub-term of 
+$S'$).
+
+We  define below the semantics of these programs  and specify well-declared program by 
+comparing the statements they contain with 
+the declared access modes. The semantics relies on the translation of 
+the access mode declarations into consistency mechanisms 
+with checks and data transfers 
+triggered 
+before each function 
+execution.
+
+\begin{figure*}[tb]
+\begin{mathpar}
+\transl{R~\abs x}=(\IF{\isvalid~\abs x}{\noop}{(\Pull~x;\Pull~\abs x)})
+
+\transl{\rem {R~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)})
+
+\transl{RW~\abs x}=(\IF{\isvalid~x}{\noop}{(\Pull~x;\Pull~\abs x)});w~\abs x
+
+\transl{\rem{RW~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)});\rem{w~\abs 
+x}
+
+\transl{W~\abs x}= w~\abs x
+
+\transl{\rem{W~\abs x}}= \rem{w~\abs x}
+
+\transl{\AM_1\{S_1\};\AM_2\{S_2\};\ldots} = \transl{\AM_1};S_1;\transl{\AM_2};S_2;\ldots
+\end{mathpar}
+\caption{Semantics of access modes and programs}\label{sem-AM}
+\end{figure*}
+\paragraph{Extension of statements to abstract variables}
+When evaluating a program, the store contains both real and abstract variables, and the 
+existing 
+statements have the same effect on the abstract variables as on the real ones. However 
+one should notice that 
+even if the effect is the same, the meaning of a statement acting on a real variable 
+or on its representative is different: in our calculus, the effect on a variable is an 
+abstraction of the real effect that involves side effects and data transfers. On the 
+contrary, only the validity status of abstract variables is stored by the library: the 
+effect triggered by an operation on an abstract variable is exactly what happens when 
+VectorPU updates the validity status of its internal structures.
+
+For example, a \Pull\ operation on a real variable consists in transferring data from a 
+remote memory space 
+to the local one. We abstracted it  by changing the local validity status. A \Pull\  
+operation on an abstract variable only changes the validity status, no data transfer has 
+to be done because abstract variables only need to be stored in one memory space. 
+The validity status is stored in the CPU address space in VectorPU. Comparing the validity 
+status of real memory and their representative  allow us to reason 
+formally on the correctness of the validity tracking performed by VectorPU.
+
+As no data is accessed by the effects on abstract variables, they cannot create stuck configuration. We will not use $r~\abs x$ as it does not 
+change the validity 
+% Comment: This is only because VectorPU uses the most primitive
+% cache coherence protocol, the MI (VI) protocol.
+% More elaborated coherence protocols like MSI or MESI introduce additional
+% states where also reads trigger state transitions to follow up the
+% number of readers (one or larger than one).
+status of variables. The statement that should get stuck in case of a read access is the 
+read of \emph{the real variable that cannot access a valid data}. 
+%Similarly, the interesting 
+%effect of read/write ($rw$) operations is entirely represented by the write ($w$) access 
+%and $rw$ is not needed over abstract variables.
+
+
+\paragraph{Semantics}
+
+Figure~\ref{sem-AM} defines the semantics of programs with access modes as a translation 
+into the core calculus of Section~\ref{sec-core}. 
+This translation
+ensures that the validity status is correct and records the effect of the function on the 
+abstract variable before running the function call that may 
+read and write data (on the real variables).  Similarly to the VectorPU library, the 
+protected accesses can be 
+considered as macros and the programs can be translated into the 
+core syntax.
+
+This encoding corresponds  to the macros as they are implemented in VectorPU.  
+It is indeed easy 
+to check that VectorPU tracks the effects in 
+the same way as our effect system  does in the translation rules. These translation 
+rules  perform \Push\ or 
+\Pull\ operations in order to ensure that the memory is in a correct validity status for 
+the read or write operation to be performed.
+When evaluating a program we create a store where the validity status of real and 
+abstract variables are $(V,I)$, corresponding to the fact that data is 
+initially placed in one memory location; typically, in VectorPU, in the CPU memory space.
+%
+%
+%From this semantics, we state two crucial correctness properties for the library and 
+%show 
+%their correctness in a semi-formal way.
+
+
+\subsection{Well-declared Programs and their Properties}
+We now define formally what it means for an access mode declaration to be correct, i.e. 
+to adequately specify the effect of a function. The principle is that each operation on a 
+memory location must be declared on its representative. It is however possible to declare 
+more read or $RW$ accesses that what is done in practice, and one can declare a read 
+and/or write 
+access if only read or write is performed. Additionally, the annotation $W$ denotes an 
+\emph{obligation} to write which allows the consistency mechanism to avoid any validity 
+checks before running the function that will overwrite the data. 
+To represent this concept, we need a first definition that states that an operation will be performed in all execution paths of a (bigger) statement. This 
+definition 
+formalises a classical static analysis concept that states that all branches of 
+conditionals necessarily execute a given statement. It considers executions that run to 
+completion and states that a given statement is necessarily evaluated in this execution.
+
+\begin{definition}[Occur in all execution paths]
+We state that a statement\emph{ $S$ occur in all execution paths of $S_0$} if, for any 
+correct 
+initial store $\sigma_0$, for all full reductions 
+$(S_0,\sigma_0)\to(S_1,\sigma_1)\to\ldots\to(\noop,\sigma_n)$, there is an intermediate 
+state $(S_i,\sigma_i)$ such that $S_i=S;S''$ for some $S''$.
+\end{definition}
+Notice that an operation $S$ may appear in some of the execution paths of $S'$ if  $S\in 
+S'$: if $(S_0,\sigma_0)\to^* (S;S',\sigma)$ then $S\in S_0$.
+
+
+\begin{definition}[Well-declared program]\label{def-WD}
+A program $\Prog$ is \emph{well-declared} if for all $\AM\{S\}$ in $\Prog$ we have:
+\begin{itemize}
+\item $\Push\ x\not\in S$ and $\Pull\ x\not \in S$ (for any $x$),
+\item $w\ x\in S \implies (W\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
+\item $r\ x\in S \implies (R\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
+\item $W\ \abs x\!\in\! \AM \!\implies\! w\ x$ occurs in all execution paths of $S$,
+\item Plus the same rules for remote operations.
+\end{itemize}
+\end{definition}
+Note that a well-declared program does not perform synchronisation 
+operations (\Push\ or \Pull) manually, these operations are only  performed when 
+evaluating the 
+access mode declarations. Also each variable accessed by a well-declared function has an 
+abstract representative in the corresponding declaration block.
+
+
+A direct consequence of the definition above is that a well-declared program cannot 
+access, in the same function, the same
+variable in both address spaces. This is in accordance with VectorPU where each function 
+is entirely executed either on a CPU or on a GPU, the formalisation is a bit more 
+ generic on this aspect. This is expressed by the following property.
+\begin{Property}[Localised access]\label{prop-localised}
+For a well-declared program containing $\AM\{S\}$, for any $x$, we cannot have $\rem {E\ 
+x} \in S$ and $E'\ x \in S$.
+\end{Property}
+
+\smallskip
+
+We now state and  prove the two major properties ensured by our formalisation.
+The first property ensures that the abstraction is correct relatively to the 
+execution. This corresponds to the fact that VectorPU tracks adequately the validity 
+status of the 
+memory. This is expressed as a theorem that is similar to subject-reduction in type 
+systems, it states that if the status of the abstract variables represent correctly the 
+validity status of the real variables, then the 
+abstraction is also correct after the execution of a  well-declared function.  Let us say 
+that  we have a \emph{correct abstraction of the memory state} if for each real memory 
+location, the abstract representative of this location has a validity status that is an 
+approximation, in the sense of $\leq$, of the validity status of the real memory. The 
+theorem below states that the execution of a well-declared function maintains the 
+correctness of the memory state 
+abstraction. 
+
+\begin{Theorem}[Subject reduction]\label{thm-SR}
+Suppose $\AM\{S\}$ is well-declared, we have:
+\[\begin{array}{@{}l@{}}
+\forall x\in \dom(\sigma).\, \sigma(\abs x)\leq\sigma(x) 
+\land
+ (\transl{\AM\{S\}},\sigma) \to^* (\noop,\sigma')
+\\~~~~~
+\implies \forall x\in \dom(\sigma').\, \sigma'(\abs x)\leq\sigma'(x) 
+\end{array}\]
+
+This property is extended by a trivial induction to the execution of a well-protected 
+program $\Prog$ in an initial store $\sigma_0=(x\mapsto 
+(V,I))^{x\in \vars(\Prog)}$.
+\end{Theorem}
+\begin{proof}
+Notice that $\dom(\sigma')=\dom(\sigma)$, and  if $\sigma(x)=(V,I)$ or $\sigma(x)=(I,V)$ 
+then $\sigma(x)=\sigma(\abs x)$, else $\sigma(x)=(V,V)$.
+We reason on the read and write access that occur in the considered reduction. Each 
+variable $x$ is either read or written or not accessed (or read and written). For each 
+case we compare the 
+status of abstract and local variable, and in particular we consider the status of the 
+reduction after executing the synchronisation code $\transl{\AM\{S\}}$ and call 
+$\sigma_s$ the corresponding store (note that $\sigma_s(\abs x)=\sigma'(\abs x)$). We 
+detail operations on the local 
+address space, cases for remote operations are similar:
+
+\noindent$\bullet$ If  $x$ is written, we have:
+$(\transl{\AM\{S\}},\sigma)\to^* (w~x;S',\sigma'')  \to^* (\noop,\sigma')$. Whatever the 
+initial value of $\sigma(x)$, we have $\sigma'(x)=(V,I)$. Two cases are possible:
+
+\noindent$(1)$ $W~\abs x \in \AM$ then the value cannot be read and we have 
+$\sigma_s(\abs x)=(V,I)$.  $ \sigma'(\abs x)=\sigma'(x)$.
+
+\noindent$(2)$ $RW~\abs x \in \AM$ then a data-transfer (\Pull) may occur. Knowing that 
+$\sigma(\abs x)\leq\sigma(x)$, by a  
+case 
+analysis on $\sigma(x)$ and $\sigma(\abs x)$ we have: $\sigma_s(\abs x)=(V,I)$ and 
+$\sigma_s(x)=(V,I)$ or $(V,V)$. Whether $x$ is  read or not we have $ \sigma'(\abs 
+x)=\sigma'(x)$.
+
+\noindent$\bullet$ If  $x$ is read but not written, its validity status is 
+not changed. %Two cases are possible:
+
+\noindent$(1)$ $R~\abs x \in \AM$. By 
+a  case 
+analysis on $\sigma(x)$ and $\sigma(\abs x)$ we have:
+$\sigma_s(x)\!=\!(V,I)$ and  $\sigma_s(\abs x)\!=\!(V,I)$, or $\sigma_s(x)\!=\!(V,V)$ 
+and  
+$\sigma_s(\abs x)\!=\!(V,I)$ or $(V,V)$.  Reading has no effect on validity status and in 
+all 
+cases we have $\sigma'(\abs x)~\leq~\sigma'(x)=\sigma_s(x)$.
+
+\noindent$(2)$ $RW~\abs x \in \AM$ then similarly to the case (2) above we have 
+$\sigma_s(\abs x)=(V,I)$, additionally $\sigma'(x)=\sigma_s(x)=(V,I)$ or $(V,V)$. In all 
+cases $\sigma'(\abs x)\leq\sigma'(x)$.
+
+\noindent$\bullet$ If  $x$ is not accessed but is in the declaration, the 
+reasoning is the same as if it was only read. 
+Note that the variable cannot be declared 
+in write mode, $W~\abs x \in \AM$, by
+Definition~\ref{def-WD}.
+\end{proof}
+
+Finally, a well-declared program always runs to completion: it never tries to access an 
+invalid memory location.
+
+\begin{Theorem}[Progress for well-declared programs]\label{thm-progress}
+If a program $\Prog$ is well-declared, then its execution cannot reach a stuck 
+configuration.
+\end{Theorem}
+
+\begin{proof}
+ By 
+Property~\ref{prop:stuck}, 
+it is sufficient to prove that 
+unification on the validity status is always possible. 
+We consider a reduction  $(\transl{\AM\{S\}},\sigma) \to^* (S,\sigma_s) \to^* \ldots$ 
+similarly  to the proof above.
+
+By definition of well-declared 
+programs and because of the signature of effects ($w~x$ cannot be stuck), only two 
+cases have to be analysed for the local operations (plus two similar cases for remote 
+statements):
+ \begin{itemize}
+\item \Pull\ operations (on $x$ and $\abs x$) in the translation of $R~\abs x$ or 
+$RW~\abs x$. Unification 
+requires that $\sigma(x)=(X,V)$ and  $\sigma(\abs x)=(Y,V)$.
+\item $r~x$ operation in the evaluation of $S$. Unification 
+requires that $\sigma'(x)=(V,X)$ where $\sigma'$ is the store in which the read access is 
+to be evaluated.
+\end{itemize}
+Indeed, access mode declarations do not generate reading operations, and by definition 
+function statements contain no \Push\ or \Pull.
+
+Concerning the first case, because of Theorem~\ref{thm-SR}, we have $\sigma(\abs x)\leq 
+\sigma(x)$, and because of property~\ref{prop:safe} none of them is $(I,I)$. By case 
+analysis on the possible values of $\sigma(\abs x)$ and $\sigma(x)$, it is easy to show 
+that $\sigma(x)=(X,V)$ and  $\sigma(\abs x)=(Y,V)$ if we reach the two \Pull\ statements 
+that perform data transfers before the execution of the function.
+
+Concerning read access, they should be verified by an induction on the reduction steps 
+following the state $(S,\sigma_s)$ showing that, for any variable $x$ that is declared $R$ 
+or $RW$, in all states we have $\sigma'(x)=(V,X)$. Indeed, by the same analysis as in the 
+proof of 
+Theorem~\ref{thm-SR} we know that $\sigma'(x)=(V,X)$. Because of 
+Property~\ref{prop-localised} no remote operation is possible on $x$ and thus only $r~x$ 
+and $w~x$ operations are possible on $x$, both maintain the invariant $\sigma'(x)=(V,X)$ 
+for some $X$.
+%
+%This is done by case analysis of the effect applied in the translated program, and 
+%showing that in each case the effect rule can be applied.
+%Take the example of \Pull. \Pull\ only appears upon $R~x$ or $RW~x$ and when  
+%$\isvalid~x$ is 
+%false. In this case $\sigma(x)=(I,V)$ by property~\ref{prop:safe}. Consequently \Pull\ 
+%is 
+%not stuck.
+%Now considering the effect $r$, $r~x$ can only be obtained by translation of $R~x$. 
+%Consequently, $r~x$ appears necessarily after a conditional \Pull, thus when we reach 
+%$r~x$ we necessarily have $\sigma(x)=(V,I)$ or 
+%$(V,V)$ (by a trivial case analysis of the possible validity status of $x$ before the 
+%\Pull). 
+%Other cases are similar.
+\end{proof}
+
+Considering the example above of a variable written on the CPU, and then read on the GPU, 
+a well-declared program encoding this behaviour would be  $RW~\abs x\{w~x\};\rem{R~\abs 
+x}\{\rem{r~x}\}$. This code automatically generates the \Push\ instruction that prevents 
+the program from being stuck.
+\subsection{Effects and Access Mode Declarations for Arrays}\label{sec-arrays}
+In array structures, the 
+validity status of the whole array is abstracted away by a single validity status pair. 
+We extend the syntax for arrays as follows, $x[i]$ denotes the indexed access to an 
+element of the array. More precisely the new operations on arrays and their elements are 
+(we still have the previous operations on non-array and abstract variables):
+\[S::= ... \,|\, r~x[i] \,|\, w~x[i] \]
+
+Synchronisation operations (\Push\ and \Pull) exist for arrays but the whole array is 
+synchronised, and we write $\Push~x$ and $\Pull~x$ as above.
+All the elements of the array are represented by a single abstract variable: $\abs{x}$ 
+represents the validity status of all $x[i]$.
+
+The semantics of access mode declarations and programs is unchanged because 
+synchronisation operations and access mode declarations do not concern array elements.
+The concept of well-protected programs must be adapted to the case of array structures, 
+and more 
+precisely to the fact that several  memory locations are represented by a single abstract 
+variable.
+
+
+\begin{definition}[Well-declared program with array access]
+A program $\Prog$ is \emph{well-declared} if for all $\AM\{S\}$ in $\Prog$, additionally 
+to the rules of Definition~\ref{def-WD}, we have:
+\begin{itemize}
+\item $w\ x[i]\in S \implies (W\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
+\item $r\ x[i]\in S \implies (R\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
+\item $W\ \abs x\in \AM \implies \forall i\in\range(x). w\ x[i]$ occurs in all execution 
+paths of $S$,
+\item Plus the same rules for remote operations.
+\end{itemize}
+Where $\range(x)$ is the set of valid 
+ indexes for an array $x$.
+\end{definition}
+
+The other properties are expressed similarly and both \emph{subject-reduction}, 
+Theorem~\ref{thm-SR}, and \emph{progress}, Theorem~\ref{thm-progress}, are 
+still valid. The only change is the ``correct abstraction of the memory state'' criteria 
+that becomes $\forall x\in 
+\vars(S).\,\forall i\in\range(x).\, \sigma(\abs x)\leq\sigma(x[i])$ instead of $\forall 
+i\in\range(x)$ for arrays. The proofs are similar except in the case of $W~x$ 
+declarations where the fact that all elements of the array must be written is necessary 
+to ensure that no element is in the status $(I,V)$ (which could not be safely represented 
+by $(V,I)$) at the end of the function execution. If we focus on the proof of 
+Theorem~\ref{thm-SR}, case ``$x$ is written, sub-case (1) we have $\sigma'(\abs x)=(V,I)$ 
+which is a safe abstraction because \emph{all elements have been written}, and thus 
+$\sigma'(x[i])=(V,I)$ for all $i$. If one element $j$ was not written, we could have had 
+$\sigma'(x[i])=(I,V)$ which would invalidate the theorem.
+%
+%
+%\subsection{Towards Array Accesses: Adding an abstraction layer}
+%In the simple formalisation provided here, we only consider simple memory locations and 
+%consequently there is no need to have an abstract representation of a set of memory 
+%locations. We can consider that the manipulation of the VectorPU abstract structure 
+%representing the memory and the memory itself as the same entity. While this point of 
+%view allowed us to provide a simple and precise enough representation, and to prove the 
+%correctness of the general approach, it becomes not close enough to the real 
+%implementation if we want to reason on array structures. In array structures, the 
+%validity status of the array is abstracted away by a single validity status pair. Then 
+%approximations inspired from classical abstract interpretation techniques~\cite{Cous77} 
+%can be used except that the abstract view is computed dynamically but must stay 
+%consistent with the validity status of the real memory.
+
+\subsection{Discussion: Similarities and differences relatively to VectorPU}
+
+\TODO{Christoph: read and comment/improve}
+\TODO{improve the link to skePU (here or additional section earlier?)}
+
+Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-AM} (valid for simple memory locations or arrays), with the vectorPU implementation of the protocol for simple arrays, Figure~\ref{fig:vectorpucoherence}. Except from the order of operations and minor changes, the structure is the same and the form of operations is similar. The main difference is that there is no view of abstract vs. concrete variables, however, if we consider that transfer operations on abstract variables have no effect, and that validity status of concrete variables can be abstracted away, the code is  the same as the formalisation. 
+
+Taking a more global point of view, no verification is performed by the VectorPU framework and thus, the property of ``well-declared programs'' is not checked currently by the framework. Such a check could either be done by a static analysis (involving some approximations, meaning  some correct programs could be rejected), or by runtime verification checking that each function performs exactly the required access. The first solution would require more development and might be tricky, while the second one is not acceptable considering the target application domain because of the overhead involved by the dynamic checks. In the current state of the library, the property ``well-declared programs''  must be ensured by the programmer.
+
+Finally concerning expressiveness, the ``well-declared programs'' definition is a bit more flexible than what VectorPU targets at the moment because it is safe to declare in our framework functions that access some variables on the CPU and others on the GPU, and this is not planned in VectorPU, again due to the supported usage scenario.
+
+These differences highlight interesting improvement directions for VectorPu while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in skePU. We consider the theoretical results below as a specification of a future extension of the library.
+
+\subsection{Overlapping arrays}
+\TODO{first draft}
+
+In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities and always used, either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
+
+First,  we suppose here that memory transfer operations are performed conveniently and that if several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays.
+
+There are two complementary approaches here: 
+
+1 ) [Well-declared functions for overlapping arrays] adapt the same approach as before to state which are the correct annotations for potentially overlapping arrays. This is done similarly to above by stating correctness conditions on well-declared programs.
+
+2 ) [Access mode inference for overlapping arrays] infer the correct annotations on non-parameter variables, i.e. knowing the access modes for the function parameters, infer what operation must be done on other intersecting arrays. This is expressed as additional access mode declarations that are inferred, the semantics of these added declarations will result in additional data transfers and validation/invalidations that make the program correct.
+
+1) is more precise but relies on the programmer to add information on variables that are not passed to the function
+
+2) fits better to what happens in skePU and corresponds to an MSI-like protocol but with valid/invlaid status similar to VectorPU internal structure
+
+
+\subsubsection{Well-declared functions for overlapping arrays}
+skeleton of the reasoning:
+
+We have the same well-declaration conditions as before except for the two following aspects:
+
+For every $y$ overlapping $x$
+ $w\ x[i]\in S \implies (W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$ if $i$ is in the range in common between $x$ and $y$.
+
+As a consequence, if
+$W\ \abs x\in \AM$ then$ \forall i\in\range(x). w\ x[i]$ occurs in all execution 
+paths of $S$, and thus for all $y$ overlapping $x$  we have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$
+
+Plus similar adjustments for remote operations.
+
+Note that this restricts a bit more the expressible aspects: e.g. $W\ \abs x ; \rem{R}\ \abs y$ cannot be valid if $x$ and $y$ overlap.
+
+
+\subsubsection{Access mode inference for overlapping arrays}
+
+The principle is, starting from a given set of access mode annotations, to infer other access modes that are consequences of the overlaps and the existing notations. Without knowing the real accesses performed by the function, we deduce a set of additional ``artificial accesses''. We consider $\AM$ the set of all access modes declared for a given function. The correct set of access modes is the smallest set $\AM$ including the originally declared modes and closed under the following rules:
+
+\begin{mathpar}
+\inferrule
+{W\ \abs x \in\AM \\ W\ \abs y \not\in\AM \\ x \text{ and } y \text{ overlap}}
+{RW\  \abs y \in\AM}
+
+\inferrule
+{RW\ \abs x \in\AM \\ x \text{ and } y \text{ overlap}}
+{RW\  \abs y \in\AM}
+\end{mathpar}
+
+Note that the application of these rules terminate provided the number of arrays is finite.
+
+
+% ---------------------------------------
+% I put it here for now as it does not fit well before Section 3
+% (obstructs the flow of reading from VectorPU to its formalization)
+% Feel free to reorder. Maybe current 3.5+3.6 could become a new
+% section after this one?
+
+\input{skepu.tex}
+
+
+% -----------------------------------------------------------
+\section{A few related works}\label{sec:RW} 
+Most of the verification works related to memory consistency focus on coherence 
+protocols 
+and/or 
+weak memory models. 
+Among them, one could cite~\cite{Gerth1999}, a formal specification of a caching 
+algorithm, and its verification in TLA~\cite{Ladkin1999}. These works shows the 
+difficulty on reasoning on memory coherency, but also that specifications in these models 
+should rely on a few simple instructions on the type of memory accessed, a bit similarly 
+to this proposal.
+Coherence protocols have also been verified using CCS specifications~\cite{Barrio01}. 
+These various works are quite different from the approach presented in this paper because 
+we rely here on a declarative approach for memory accesses: the programmer declares the 
+kind of memory accesses performed by a component, and the consistency mechanism ensures 
+that each component accesses a valid memory space.
+
+More recently, and adopting a more language oriented approach, Crary and 
+Sullivan~\cite{Crary:POPL:2015} designed 
+a calculus for expressing ordering of memory accesses in weak memory models, however we 
+are interested here in a much simpler problem where memory access is somehow sequential 
+and clearly identified. 
+Even a  extension of this work for parallel processes would  result in a 
+simpler model than the ones that exist for weak memory models because of the explicit 
+consistency points introduced in the execution by the start/end of each function. 
+
+The closest work to ours are probably~\cite{BJPTSAC16} that define a memory access calculus similar to ours and prove the 
+correctness of a generic cache coherence protocol expressed as part of the semantics of 
+the calculus. Compared to this work, we are interested in explicit statements on memory 
+accesses and thus the cache consistency is partially ensured  by the programmer 
+annotations, making the approach and the properties proven significantly different. Some 
+aspects of the approaches could however been made more similar, e.g. by extending our 
+work to more than two address spaces or adopting a different  syntax. However our problem 
+and formalisation are quite simpler, and we 
+believe easier to read, while sufficient for our study.
+The same authors also designed a formal model written in Maude~\cite{BJPTMaude16} to 
+better understand the possible 
+optimisations and the impact of the memory organisation on performance in the context of 
+cache coherent multicore architectures. This could be an interesting starting point for 
+future works, especially if we 
+extend our work to better model the performance aspects of VectorPU and want to reason 
+formally on the improved performance obtained by the library.
+
+\section{Conclusion and future works}\label{sec:conclusion}
+In this article we provided a formal approach to verify the consistency of the memory 
+accesses in heterogeneous computer systems made of two memory spaces. We formalise the 
+operations of memory accesses and memory synchronisation between the two memory spaces 
+and prove that a program adequately annotated with informations on the memory accesses 
+always access valid memory spaces and tracks correctly which of the memory space contains 
+the up-to-date data.
+
+The practical result is that we can verify the coherency mechanism used by the VectorPU 
+library and ensure that, additionally to the significant performance benefits of the 
+approach, the VectorPU mechanisms is correct and ensures the consistency of the memory 
+accesses.
+
+We envision several extensions to this work,  the most promising is the study 
+of  the operations made on overlapping arrays. 
+The current implementation of VectorPU supposes that the annotated memory 
+accesses deal with disjoint memory locations, it does not 
+take into account overlapping arrays. Designing an extension of the library that could 
+deal safely with overlapping array is one of the future direction we would like to 
+pursue. 
+Additionally, the current paper only deals with two memory spaces, the extension to many 
+memory spaces seem relatively simple but  the mechanism dealing 
+with memory transfers between several memory locations becomes a bit more complex; its 
+formalisation should be similar.
+Finally, we are interested in the application of our approach to the 
+verification of other frameworks. Indeed VectorPU uses the most primitive
+ cache coherence protocol, the VI-protocol.
+ More elaborated coherence protocols like MSI or MESI introduce additional
+ states where the
+ number of readers has to be tracked for example. Verifying such framework would require 
+ a modification of our abstract state representation and a modification of the access 
+ mode translational semantics.
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+\section*{References}
+\bibliographystyle{elsarticle-num} 
+\bibliography{bibliography}
+
+
+
+\end{document}
+\endinput
+%%
+%% End of file `elsarticle-template-num.tex'.
