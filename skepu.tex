@@ -337,8 +337,8 @@ const T& Vector<T>::operator[](const size_type index) const
   m_deviceDataHasChanged = false;
   ...
 ...
-// returns true if there exists any range (that needs to be written)
-// that is overlapping to the otherCopy:
+// Function doCopiesOverlap() returns true if there exists any range
+// (that needs to be written) that is overlapping with the otherCopy:
 template <typename T>
 bool DeviceMemPointer_CU<T>::doCopiesOverlap(
                                 DeviceMemPointer_CU<T> *otherCopy,...)
