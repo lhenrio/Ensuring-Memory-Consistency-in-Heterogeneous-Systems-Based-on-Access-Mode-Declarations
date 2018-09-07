@@ -125,26 +125,24 @@ code from files \texttt{vector.hpp}, %\texttt{vector/vector.inl}
 \begin{verbatim}
 // from vector.hpp:
 
-  template <typename T>
-  class Vector
-  {   ...
-    public:
+template <typename T>
+class Vector
+{   ...
+  private: //-- Data --//
+    T *m_data;
+    mutable bool m_valid; // keep track whether main copy is valid or not
+    size_type m_capacity;
+    size_type m_size;
+    bool m_deallocEnabled;
+    mutable bool m_noValidDeviceCopy;
       ...
-    private: //-- Data --//
-      T *m_data;
-      mutable bool m_valid; // keep track whether main copy is valid or not
-      size_type m_capacity;
-      size_type m_size;
-      bool m_deallocEnabled;
-      mutable bool m_noValidDeviceCopy;
-      ...
-      mutable std::map<std::pair<T*, size_type>, device_pointer_type_cu>
-                 m_deviceMemPointers_CU[MAX_GPU_DEVICES];
-      // list of copies changed on device but not synced with host memory:
-      mutable std::map<std::pair<T*, size_type>, device_pointer_type_cu>
-                 m_deviceMemPointers_Modified_CU[MAX_GPU_DEVICES];
-     ...
-  } ...
+    mutable std::map<std::pair<T*, size_type>, device_pointer_type_cu>
+               m_deviceMemPointers_CU[MAX_GPU_DEVICES];
+    // list of copies changed on device but not synced with host memory:
+    mutable std::map<std::pair<T*, size_type>, device_pointer_type_cu>
+                m_deviceMemPointers_Modified_CU[MAX_GPU_DEVICES];
+    ...
+} ...
 \end{verbatim}
 \end{small}
 
@@ -157,20 +155,20 @@ code from files \texttt{vector.hpp}, %\texttt{vector/vector.inl}
 \begin{verbatim}
 // from vector_cu.inl:
 
-  // function updateDevice_CU manages container state for
-  // read and write accesses on a CUDA device:
-  ...
-  else {
-      bool noModifiedDevCopy = true;
-      // Check all overlapping copies from all devices as invalid:
-      for (int devID = 0; devID < MAX_GPU_DEVICES; ++devID) {
-         if (m_deviceMemPointers_Modified_CU[devID].empty() == false) {
-            noModifiedDevCopy = false; break;
-      }  }
-      if(noModifiedDevCopy)  m_valid = true;
-      else                   m_valid = false;
-   }
-   ...
+// function updateDevice_CU manages container state for
+// read and write accesses on a CUDA device:
+...
+else {
+  bool noModifiedDevCopy = true;
+  // Check all overlapping copies from all devices as invalid:
+  for (int devID = 0; devID < MAX_GPU_DEVICES; ++devID) {
+     if (m_deviceMemPointers_Modified_CU[devID].empty() == false) {
+         noModifiedDevCopy = false; break;
+   }  }
+   if(noModifiedDevCopy)  m_valid = true;
+   else                   m_valid = false;
+}
+...
 \end{verbatim}
 \end{small}
 
@@ -206,35 +204,37 @@ code from files \texttt{vector.hpp}, %\texttt{vector/vector.inl}
 \begin{small}
 \begin{verbatim}
 // from device_mem_pointer_cu.h:
-   // creating new device copy: allocate amount of space in device memory
-   // and store a pointer to some data in host memory.
-   ...
-   /*! ranges that should be checked for overlap with other copies */
-   m_rangesToCompare[m_numOfRanges++] =
-                     std::make_pair( m_hostDataPointer, m_numElements );
-   m_deviceDataHasChanged = false;
-   ...
- 
-   // returns true if there exists any range (that needs to be written) that
-   // is overlapping to the otherCopy:
-   template <typename T>
-   bool DeviceMemPointer_CU<T>::doCopiesOverlap ( DeviceMemPointer_CU<T> *otherCopy, ...)
-   { ...
-     if (m_numOfRanges < 1)
-        return false;
-     for(size_t i=0; i<m_numOfRanges; ++i) {
-        T *hostDataPointer = m_rangesToCompare[i].first;
-        size_t numElements = m_rangesToCompare[i].second;
-        if (hostDataPointer >= otherCopy->m_hostDataPointer
-          && hostDataPointer < otherCopy->m_hostDataPointer + otherCopy->m_numElements)
-          return true;
-       if (otherCopy->m_hostDataPointer >= hostDataPointer
-         && otherCopy->m_hostDataPointer < hostDataPointer + numElements )
-           return true;
-       }
-     return false;
+
+// creating new device copy: allocate amount of space in device memory
+// and store a pointer to some data in host memory.
+  ...
+  /*! ranges that should be checked for overlap with other copies */
+  m_rangesToCompare[m_numOfRanges++] =
+                   std::make_pair( m_hostDataPointer, m_numElements );
+  m_deviceDataHasChanged = false;
+  ...
+...
+// returns true if there exists any range (that needs to be written)
+// that is overlapping to the otherCopy:
+template <typename T>
+bool DeviceMemPointer_CU<T>::doCopiesOverlap(
+                                DeviceMemPointer_CU<T> *otherCopy,...)
+{  ...
+  if (m_numOfRanges < 1)
+    return false;
+  for(size_t i=0; i<m_numOfRanges; ++i) {
+    T *hostDataPointer = m_rangesToCompare[i].first;
+    size_t numElements = m_rangesToCompare[i].second;
+    if (hostDataPointer >= otherCopy->m_hostDataPointer &&
+        hostDataPointer < otherCopy->m_hostDataPointer+otherCopy->m_numElements)
+      return true;
+    if (otherCopy->m_hostDataPointer >= hostDataPointer &&
+        otherCopy->m_hostDataPointer < hostDataPointer + numElements )
+       return true;
    }
-   // ... for further overlap test functions see device_mem_pointer_cu.h
+   return false;
+ }
+ // ... for further overlap test functions see device_mem_pointer_cu.h
 \end{verbatim}
 \end{small}
 %
