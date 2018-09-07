@@ -19,10 +19,9 @@ well as CUDA and OpenCL backends for execution on single and multiple GPUs.
 While it is possible to enforce using a specific backend (and thus,
 execution platform) for a skeleton call or even an entire program
 run, SkePU provides autotuned backend selection, which automatically 
-decides at runtime,
-based on internal performance models for the current target system, 
-where to best execute a 
-skeleton call in order to optimize for time or energy. 
+decides at runtime where to execute a 
+skeleton call in order to optimize for time or energy.
+In this case the decision is based on internal performance models for the current target system. 
 
 All (non-scalar) operands passed into or out of skeleton calls must be
 SkePU data containers, which wrap C++ datatypes;

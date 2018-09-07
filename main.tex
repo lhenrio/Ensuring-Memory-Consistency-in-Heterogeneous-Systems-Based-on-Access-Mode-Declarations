@@ -898,8 +898,12 @@ These differences highlight interesting improvement directions for VectorPU whil
 
 In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities and always used, either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
 
-First,  we suppose here that memory transfer operations are performed conveniently \TODO{What do you mean by ''conveniently''?} and that if several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays. \TODO{The point is that the common elements
+First,  we suppose here that memory transfer operations are performed addording to the following rules. If several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays. 
+\TODO{The point is that the common elements
 in x and y are replicated in the two device copies of x and y.}
+\TODO{Really? meaning you cannot have neither W nor RW on x or y? 
+this is really restrictive!!!}
+\TODO{to remove the restriction you need to create overlapping copies on the other side ... or completely change the mechanism}
 
 There are two complementary approaches here: 
 
