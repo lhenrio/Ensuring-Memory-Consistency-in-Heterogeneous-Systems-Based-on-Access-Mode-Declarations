@@ -883,32 +883,33 @@ $\sigma'(x[i])=(I,V)$ which would invalidate the theorem.
 \subsection{Discussion: Similarities and differences relatively to VectorPU}
 
 \TODO{Christoph: read and comment/improve}
-\TODO{improve the link to skePU (here or additional section earlier?)}
+\TODO{improve the link to SkePU (here or additional section earlier?) --- Looks fine to me in the current form.}
 
-Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-AM} (valid for simple memory locations or arrays), with the vectorPU implementation of the protocol for simple arrays, Figure~\ref{fig:vectorpucoherence}. Except from the order of operations and minor changes, the structure is the same and the form of operations is similar. The main difference is that there is no view of abstract vs. concrete variables, however, if we consider that transfer operations on abstract variables have no effect, and that validity status of concrete variables can be abstracted away, the code is  the same as the formalisation. 
+Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-AM} (valid for simple memory locations or arrays), with the VectorPU implementation of the protocol for simple arrays, Figure~\ref{fig:vectorpucoherence}. Except from the order of operations and minor changes, the structure is the same and the form of operations is similar. The main difference is that there is no view of abstract vs. concrete variables, however, if we consider that transfer operations on abstract variables have no effect, and that validity status of concrete variables can be abstracted away, the code is  the same as the formalisation. 
 
 Taking a more global point of view, no verification is performed by the VectorPU framework and thus, the property of ``well-declared programs'' is not checked currently by the framework. Such a check could either be done by a static analysis (involving some approximations, meaning  some correct programs could be rejected), or by runtime verification checking that each function performs exactly the required access. The first solution would require more development and might be tricky, while the second one is not acceptable considering the target application domain because of the overhead involved by the dynamic checks. In the current state of the library, the property ``well-declared programs''  must be ensured by the programmer.
 
 Finally concerning expressiveness, the ``well-declared programs'' definition is a bit more flexible than what VectorPU targets at the moment because it is safe to declare in our framework functions that access some variables on the CPU and others on the GPU, and this is not planned in VectorPU, again due to the supported usage scenario.
 
-These differences highlight interesting improvement directions for VectorPu while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in skePU. We consider the theoretical results below as a specification of a future extension of the library.
+These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. We consider the theoretical results below as a specification of a future extension of the library.
 
 \subsection{Overlapping arrays}
 \TODO{first draft}
 
 In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities and always used, either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
 
-First,  we suppose here that memory transfer operations are performed conveniently and that if several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays.
+First,  we suppose here that memory transfer operations are performed conveniently \TODO{What do you mean by ''conveniently''?} and that if several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays. \TODO{The point is that the common elements
+in x and y are replicated in the two device copies of x and y.}
 
 There are two complementary approaches here: 
 
 1 ) [Well-declared functions for overlapping arrays] adapt the same approach as before to state which are the correct annotations for potentially overlapping arrays. This is done similarly to above by stating correctness conditions on well-declared programs.
 
-2 ) [Access mode inference for overlapping arrays] infer the correct annotations on non-parameter variables, i.e. knowing the access modes for the function parameters, infer what operation must be done on other intersecting arrays. This is expressed as additional access mode declarations that are inferred, the semantics of these added declarations will result in additional data transfers and validation/invalidations that make the program correct.
+2 ) [Access mode inference for overlapping arrays] infer the correct annotations on non-parameter variables, i.e. knowing the access modes for the function parameters, infer what operation must be done on other intersecting arrays. This is expressed as additional access mode declarations that are inferred, the semantics of these added declarations will result in additional data transfers and validations/invalidations that make the program correct.
 
 1) is more precise but relies on the programmer to add information on variables that are not passed to the function
 
-2) fits better to what happens in skePU and corresponds to an MSI-like protocol but with valid/invlaid status similar to VectorPU internal structure
+2) fits better to what happens in SkePU and corresponds to an MSI-like protocol but with valid/invalid status similar to VectorPU internal structure
 
 
 \subsubsection{Well-declared functions for overlapping arrays}
@@ -942,7 +943,7 @@ The principle is, starting from a given set of access mode annotations, to infer
 {RW\  \abs y \in\AM}
 \end{mathpar}
 
-Note that the application of these rules terminate provided the number of arrays is finite.
+Note that the application of these rules terminates provided the number of arrays is finite.
 
 
 % ---------------------------------------
