@@ -167,7 +167,7 @@ data transfer \sep  software caching \sep  cache coherence
 
 \input{vectorpu-intro.tex}
 
-\section{Formalization}\label{sec:Formal}
+\section{A Formalization for Reasoning on  Consistency in VectorPU}\label{sec:Formal}
 
 In this section we provide a minimal calculus to reason on the memory operations that can 
 exist in a framework that deals with memory consistency like VectorPU. We first define a 
@@ -337,7 +337,7 @@ that are universally quantified in each rule.
  The first %three
  four rules present the 
 evaluation of conditional statements, we suppose additional rules exist for evaluating 
-$\oplus$\footnote{We are only interested in cache coherence properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect on a variable $x$ updating the validity store, 
+$\oplus$\footnote{We are only interested in cache consistency properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect on a variable $x$ updating the validity store, 
 and the \textsc{Remote Effect} rule applies an effect occurring on the distant memory, it 
 applies the symmetric of the effect to the variable. Note that \Push\ is the symmetric of 
 \Pull\ and we could have removed one of those two operations without loss of generality. 
@@ -895,7 +895,7 @@ Finally concerning expressiveness, the ``well-declared programs'' definition is 
 
 These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. We consider the theoretical results below as a specification of a future extension of the library.
 
-\subsection{Overlapping arrays}
+\section{Overlapping arrays}
 
 In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities and always used, either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
 
@@ -906,7 +906,7 @@ Consequently, on the formal side, if several push or pull are performed on overl
 Overlapping arrays raises several difficulties making the approach currently adopted in VectorPU not adapted. Indeed a single write operation can change the validity status of a cell that belongs to several arrays. Consequently, several access annotations may have to be written for a single operation. As a consequence, some annotations may never be correct: a function that is declared to write all the elements of an array $x$ will necessarily write some elements of the arrays that have an overlap with $x$, these overlapping arrays should thus be annotated and transmitted, or another coherence protocol should be used.
 
 \paragraph{Approach}
-In this work we take the decision not to change the coherency protocol of VectorPU and instead work at the access mode declaration level to ensure the coherency of overlapping arrays.
+In this work we take the decision not to change the coherence protocol of VectorPU and instead work at the access mode declaration level to ensure the consistency of overlapping arrays.
 
 To take into account overlapping arrays in VectorPU, two approaches could be envisioned. The first one is based on access mode verification similarly to the approach adopted in the rest of the paper.  This would be done similarly to above by stating correctness conditions on well-declared programs. This approach relies on the programmer to annotate enough variables. Due to the array overlap, the programmer should now know all the arrays that are impacted by a function execution, including the overlapping arrays that are not passed as parameter, and the library should be extended to pass them as ``artificial'' parameters. This is presented below in Section~\ref{sec:Well-declared-overlap}
 
@@ -915,7 +915,7 @@ The objective of this second approach is to infer the correct annotations on  va
 
 Another way to see the next two subsection is that the first one extends the well-declared definition for overlapping arrays, and the second one defines an inference mechanism that ensures that a function is well-declared in presence of overlapping arrays, provided the declaration is correct not taking overlapping arrays into consideration, i.e. in the sense of Definition~\ref{def:well-declared-array}.
 
-\subsubsection{Well-declared functions for overlapping arrays}\label{sec:Well-declared-overlap}
+\subsection{Well-declared functions for overlapping arrays}\label{sec:Well-declared-overlap}
 skeleton of the reasoning:
 
 We have the same well-declaration conditions as before except for the two following aspects:
@@ -932,7 +932,7 @@ Plus similar adjustments for remote operations.
 Note that this restricts a bit more the expressible aspects: e.g. $W\ \abs x ; \rem{R}\ \abs y$ cannot be valid if $x$ and $y$ overlap.
 
 
-\subsubsection{Access mode inference for overlapping arrays}\label{sec:infer-overlap}
+\subsection{Access mode inference for overlapping arrays}\label{sec:infer-overlap}
 
 The principle is, starting from a given set of access mode annotations, to infer other access modes that are consequences of the overlaps and the existing notations. Without knowing the real accesses performed by the function, we deduce a set of additional ``artificial accesses''. We consider $\AM$ the set of all access modes declared for a given function. The correct set of access modes is the smallest set $\AM$ including the originally declared modes and closed under the following rules:
 
