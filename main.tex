@@ -910,6 +910,8 @@ Overlapping arrays raises several difficulties making the approach currently ado
 \paragraph{Approach}
 In this work we take the decision not to change the coherence protocol of VectorPU and instead work at the access mode declaration level to ensure the consistency of overlapping arrays.
 
+\TODO{rewrite: the first part is in fact not much different from the previous section}
+
 To take into account overlapping arrays in VectorPU, two approaches could be envisioned. The first one is based on access mode verification similarly to the approach adopted in the rest of the paper.  This would be done similarly to above by stating correctness conditions on well-declared programs. This approach relies on the programmer to annotate enough variables. Due to the array overlap, the programmer should now know all the arrays that are impacted by a function execution, including the overlapping arrays that are not passed as parameter, and the library should be extended to pass them as ``artificial'' parameters. This is presented below in Section~\ref{sec:Well-declared-overlap}
 
 Though very precise, this approach does not seem realistic and we additionally develop an inference mechanism for access mode declarations in presence of overlapping arrays.
