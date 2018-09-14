@@ -1,3 +1,4 @@
+% !TeX spellcheck = en_GB
 %% 
 %% Copyright 2007-2018 Elsevier Ltd
 %% 
@@ -894,11 +895,11 @@ Finally concerning expressiveness, the ``well-declared programs'' definition is 
 These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. We consider the theoretical results below as a specification of a future extension of the library.
 
 \subsection{Overlapping arrays}
-\TODO{first draft}
 
 In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities and always used, either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
 
-First,  we suppose here that memory transfer operations are performed addording to the following rules. If several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays. 
+First, in vectorPU no memory allocation occurs during data transfer (memory is pre-allocated). Consequently, two successive data transfers of the same memory location will be written to the same memory location, even if the two initial locations are accessed through different (overlapping) vectors.
+Consequently, in the formalisation, If several push/pull are performed on overlapping memory locations, the transfer is done in a correct way. \TODO{write properly, I mean : }When we write $\Push\ x; \Push\ y$ on two overlapping arrays it pushes two overlapping arrays. 
 \TODO{The point is that the common elements
 in x and y are replicated in the two device copies of x and y.}
 \TODO{Really? meaning you cannot have neither W nor RW on x or y? 
