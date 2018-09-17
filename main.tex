@@ -897,11 +897,12 @@ These differences highlight interesting improvement directions for VectorPU whil
 
 \section{Overlapping arrays}
 
-In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities and always used, either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
+In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities (such as
+VectorPU \texttt{pvector}s) and always used either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
 
 \subsection{Context and Objectives}
 
-First, in vectorPU no memory allocation occurs during data transfer (memory is pre-allocated). Consequently, two successive data transfers of the same memory location will be written to the same memory location, even if the two initial locations are accessed through different (overlapping) vectors.
+First, in VectorPU no memory allocation occurs during data transfer (memory is pre-allocated).\TODO{To be more precise (see also my added text at the end of Sect. 2): The first pvector on a vector passed as argument for access on device will (over)allocate space for the entire vector, all subsequent pvector accesses to the same vector can skip the allocation.} Consequently, two successive data transfers of the same memory location will be written to the same memory location, even if the two initial locations are accessed through different (overlapping) vectors.
 Consequently, on the formal side, if several push or pull are performed on overlapping memory locations, the transferred memory has the same overlaps as the source.
 
 \paragraph{Problem statement}
@@ -953,14 +954,18 @@ The principle is, starting from a given set of access mode annotations, to infer
 Note that the application of these rules terminates provided the number of arrays is finite.
 
 
-% ---------------------------------------
-% I put it here for now as it does not fit well before Section 3
-% (obstructs the flow of reading from VectorPU to its formalization)
-% Feel free to reorder. Maybe current 3.5+3.6 could become a new
-% section after this one?
+\subsection{Towards an implementation in VectorPU}
 
-\subsection{Towards a VectorPU implementation}
-\input{skepu.tex}
+... TBD
+
+
+% 180916 CK: I disabled the SkePU section for now,
+% as we now have the better VectorPU pvector use case instead.
+% For the comparison to SkePU we can write something shorter,
+% if at all (just explain why it is more difficult,
+% see also the corresponding added remarks in the Conclusion).
+%
+%\input{skepu.tex}
 
 
 % -----------------------------------------------------------
@@ -1019,23 +1024,48 @@ library and ensure that, additionally to the significant performance benefits of
 approach, the VectorPU mechanisms is correct and ensures the consistency of the memory 
 accesses.
 
-We envision several extensions to this work,  the most promising is the study 
-of  the operations made on overlapping arrays. 
-The current implementation of VectorPU supposes that the annotated memory 
-accesses deal with disjoint memory locations, it does not 
-take into account overlapping arrays. Designing an extension of the library that could 
-deal safely with overlapping array is one of the future direction we would like to 
-pursue. 
-Additionally, the current paper only deals with two memory spaces, the extension to many 
-memory spaces seem relatively simple but  the mechanism dealing 
+We also extended our model for studying the effect of
+operations made on overlapping arrays.
+The current implementation of VectorPU supposes that the 
+(\texttt{pvector}) array operands always
+represent disjoint memory locations, it does not 
+take into account overlapping arrays. 
+Based on the solution developed in our model,
+we described an extension of the VectorPU library that could 
+deal safely with overlapping array accesses by
+overlapping \texttt{pvector} arguments.
+
+We envision several extensions to this work.
+% This old text from the conference was replaced
+% by the previous new paragraph:
+% ,  the most promising is the study 
+% of  the operations made on overlapping arrays. 
+% The current implementation of VectorPU supposes that the annotated memory 
+% accesses deal with disjoint memory locations, it does not 
+% take into account overlapping arrays. Designing an extension of the library that could 
+% deal safely with overlapping array is one of the future direction we would like to 
+% pursue. 
+%Additionally, 
+The current article only deals with two memory spaces; the extension to many 
+memory spaces (as supported e.g.\ in SkePU)
+seems relatively simple but  the mechanism dealing 
 with memory transfers between several memory locations becomes a bit more complex; its 
 formalisation should be similar.
-Finally, we are interested in the application of our approach to the 
-verification of other frameworks. Indeed VectorPU uses the most primitive
- cache coherence protocol, the VI-protocol.
- More elaborated coherence protocols like MSI or MESI introduce additional
- states where the
- number of readers has to be tracked for example. Verifying such framework would require 
+
+Moreover, we are interested in the application of our approach to the 
+verification of other frameworks. 
+Indeed VectorPU uses the most primitive
+cache coherence protocol, the VI-protocol.
+ More elaborated coherence protocols like MSI or MESI 
+ (as used e.g.\ in SkePU \cite{Dastgeer-IJPP15}) 
+ introduce additional states where the
+ number of readers has to be tracked for example. 
+ Also, SkePU uses a more space-efficient management of
+ partial vector accesses, allowing multiple overlapping
+ copies to co-exist on the same device, such that the
+ coherence protocol involves intersection tests with
+ existing copies. 
+ Verifying such framework would require 
  a modification of our abstract state representation and a modification of the access 
  mode translational semantics.
 %% If you have bibdatabase file and want bibtex to generate the

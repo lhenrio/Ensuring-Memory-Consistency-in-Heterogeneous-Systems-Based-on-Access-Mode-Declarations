@@ -273,6 +273,7 @@ foo ( R( vx ), W( vy ), RW( vz ), size ) ;
 Here, the access mode specifiers and the resulting coherence policy
  only apply to that particular invocation of \verb-foo-, while other
 invocations of \verb-foo- might use different access mode specifiers.
+
 The following example shows how to use iterators:
 
 {\footnotesize \begin{verbatim}
@@ -286,8 +287,19 @@ std::copy( RI(vx), REI(vx),
 \noindent 
 where \verb.std::generate. is a CPU function filling a section between
 two addresses with values (here, random numbers),
-and \verb.thrust::sort. denotes the GPU sorting functionality.
+and \verb.thrust::sort. denotes the GPU sorting functionality
 provided by the Nvidia Thrust library. 
+
+% New 180916 CK:
+Using iterators, VectorPU allows to define references to
+contiguous subranges of a vector,
+called \textit{partial vectors} (\texttt{pvector}s), 
+which can be passed as vector-compatible
+operands to a function instead of an entire vector.
+In this way, it is possible to pass several (disjoint or even
+overlapping) pvector objects as seemingly different vector
+arguments that however are just windows onto
+a common vector container variable. 
 
 \begin{figure}
 \begin{small}
@@ -365,6 +377,18 @@ variants of \texttt{vector}
 simple \texttt{vector}s) follows a
 simple valid-invalid protocol.
 %(single-reader single-writer sharing).
+
+% new 180916 CK:
+For implementing the \texttt{pvectors} atop \texttt{vector}s, 
+VectorPU uses the simplistic approach of allocating memory for
+the \emph{entire} \texttt{vector} on the device 
+even if the \texttt{pvector}(s) might only
+access a minor part of it. This may waste device memory space 
+but makes local address calculations easy, and anyway only
+the accessed elements (the \texttt{pvector} range) will be transferred.
+As we will see later, it also simplifies coherence management
+for \emph{overlapping} \texttt{pvector} accesses, which was not 
+really foreseen as a use case in the original VectorPU design.
 
 \vspace{1.4mm}
 \noindent
