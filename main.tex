@@ -904,8 +904,8 @@ VectorPU \texttt{pvector}s) and always used either as the disjoint sub-arrays or
 
 \subsection{Context and Objectives}
 
-In VectorPU, the first pvector on a vector passed as argument for access on device will (over)allocate space for the entire vector, all subsequent pvector accesses to the same vector can skip the allocation.
- Consequently, two successive data transfers of the same memory location will be written to the same memory location, even if the two initial locations are accessed through different (overlapping) pvectors.
+In VectorPU, the first \texttt{pvector} on a vector passed as argument for access on device will (over)allocate space for the entire \texttt{vector}, all subsequent \texttt{pvector} accesses to the same \texttt{vector} can skip the allocation.
+ Consequently, two successive data transfers of the same memory location will be written to the same memory location, even if the two initial locations are accessed through different (overlapping) \texttt{pvector}s.
 Consequently, on the formal side, if several push or pull are performed on overlapping memory locations, the transferred memory has the same overlaps as the source.
 
 \paragraph{Problem statement}
@@ -926,7 +926,7 @@ Note that this restricts a bit the expressible effects as, for example. $W\ \abs
 \medskip
 
 Though very precise, this approach does not seem realistic and we additionally develop an inference mechanism for access mode declarations in presence of overlapping arrays.
-The objective of this second approach is to infer the correct annotations on  variables that are not passed as parameters. Knowing the access modes for the function parameters, We infer what operation must be done on other intersecting arrays. This is expressed as additional access mode declarations that are inferred, the semantics of these added declarations will result in additional data transfers and validations/invalidations that make the program correct. This is less precise as it takes a pessimistic approach on the operations performed by the declared arrays. For example for any array that is declared $RW$ we will suppose that all the array elements may be read and written, but the approach is safe and mostly automatic. This is presented in Section~\ref{sec:infer-overlap} below.
+The objective of this second approach is to infer the correct annotations on  variables that are not passed as parameters. Knowing the access modes for the function parameters, we infer what operation must be done on other intersecting arrays. This is expressed as additional access mode declarations that are inferred, the semantics of these added declarations will result in additional data transfers and validations/invalidations that make the program correct. This is less precise as it takes a pessimistic approach on the operations performed by the declared arrays. For example, for any array that is declared $RW$ we will suppose that all the array elements may be read and written, but the approach is safe and mostly automatic. This is presented in Section~\ref{sec:infer-overlap} below.
 %
 %Another way to see the next two subsection is that the first one extends the well-declared definition for overlapping arrays, and the second one defines an inference mechanism that ensures that a function is well-declared in presence of overlapping arrays, provided the declaration is correct not taking overlapping arrays into consideration, i.e. in the sense of Definition~\ref{def:well-declared-array}.
 

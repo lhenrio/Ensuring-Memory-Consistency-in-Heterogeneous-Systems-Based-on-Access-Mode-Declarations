@@ -294,12 +294,12 @@ provided by the Nvidia Thrust library.
 Using iterators, VectorPU allows to define references to
 contiguous subranges of a vector,
 called \textit{partial vectors} (\texttt{pvector}s), 
-which can be passed as vector-compatible
-operands to a function instead of an entire vector.
+which can be passed as \texttt{vector}-compatible
+operands to a function instead of an entire \texttt{vector}.
 In this way, it is possible to pass several (disjoint or even
-overlapping) pvector objects as seemingly different vector
+overlapping) \texttt{pvector} objects as seemingly different \texttt{vector}
 arguments that however are just windows onto
-a common vector container variable. 
+a common \texttt{vector} container variable. 
 
 \begin{figure}
 \begin{small}
@@ -340,7 +340,7 @@ void coherent_on_gpu_rw(){
 }
 \end{verbatim}
 \end{small}
-\caption{\label{fig:vectorpucoherence}Coherence control code,i
+\caption{\label{fig:vectorpucoherence}Coherence control code,
     here for simple vectors,
     in \texttt{vectorpu.h}. Functions \texttt{download} and
     \texttt{upload} are implemented using CUDA
