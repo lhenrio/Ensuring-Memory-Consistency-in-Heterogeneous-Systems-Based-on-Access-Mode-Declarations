@@ -1,3 +1,4 @@
+% !TeX spellcheck = en_GB
 Heterogeneous computer systems, such as traditional CPU-GPU based systems, 
 % keep it simple and remove:
 % require different programming models for
@@ -74,7 +75,7 @@ which only require a standard C++ compiler. Emulating these
 light-weight
 component and access mode constructs without additional language
 and compiler support (in contrast to, e.g., OpenACC or OpenMP), 
-leads however to some compromises in static analyzability.
+leads however to some compromises concerning the possibility to perform static analysis.
 In particular, VectorPU has no explicit type system for the
 access modes, as these are not known to the C++ compiler.
 
@@ -96,7 +97,7 @@ The contributions of this paper are:
     inconsistent state and all memory accesses succeed.
 \end{itemize}
 
-This article is an extended version of \cite{HKL-4PAD2018} \TODO{explain differences}
+This article is an extended version of \cite{HKL-4PAD2018}, with two main additions. First the relationship between the formal results and the VectorPU implementation is  detailed, illustrating the impact of the proven results on the behaviour of the library. Second, the theoretical framework is extended to take into account the fact that manipulated arrays may overlap and that the consistency mechanism must take this information into account to be correct. While overlapping arrays are not yet supported by VectorPU, based on the formal model we develop, we show how a simple extension of the library could provide support for overlapping arrays.
 
 This paper is organized as follows:
 Section~\ref{VectorPU} reviews VectorPU as far as required for  this paper, for further information we refer to \cite{VectorPU-2017}.
