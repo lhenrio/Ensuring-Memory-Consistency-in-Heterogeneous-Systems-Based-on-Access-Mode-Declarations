@@ -971,7 +971,45 @@ Consider a program that is well-declared according to Definition~\ref{def:well-d
 
 \subsection{Towards an implementation in VectorPU}
 
-%start to work on this
+
+% Tell what is needed
+To implement the proposed mechanism that ensure the safety of overlapping vectors
+in a function call $f$, we need the two following components:
+\begin{itemize}
+    \item A representation $r$ to encode the knowledge that for a given vector $v$,
+          which other components are overlapped with $v$.
+          At the vector declaration phase of a program,
+          the representation is constructed by overloading the vector constructor.
+          When a vector finishes its life cycle,
+          it is erased from the representation.
+    \item A mechanism which intercept the function call $f$,
+          look up in the representation $r$ all the overlapping vectors for every vector in the argument list
+          of the function call $f$. Then we perform the conservative coherence actions on those vectors retrieved by the look-up.
+          To intercept the function call, the function call operator is overloaded.
+\end{itemize}
+
+% Summarise the requirement for data structure
+For the first component, we can see that a graph representation is needed.
+Given a simple three-vector set, one can easily construct a scenario
+that all three vectors overlaps with each other in memory address ranges.
+For the second component, we notice that the insertion, deletion and the look-up operators is required.
+To summarise, we need a data structure that can represent a graph structure and support efficient insertion, deletion
+and the look-up operators.
+
+% given the requirement, select a data structure that fulfil the requirement
+We can choose dense 2-dimensional matrix to represent the graph.
+We need to know the size of 2-dimensional matrix in advance.
+We assume the number of vectors in a program is reasonably small
+so that a dense matrix will not take noticeably large amount of memory
+and we can set in advance a reasonable number for the size,
+or rely on the static analysis of a compiler to estimate a conservative size value.
+The insertion of an overlapping array pair requires to write a 1 in a cell of the dense matrix,
+thus only takes $O(1)$ in time, the deletion operator requires to write a 0 in a cell
+thus also takes $O(1)$. The look-up operator only requires to return a row of the matrix,
+thus also takes $O(1)$. Since we only need a binary number in a cell of the matrix,
+thus the memory size of the dense matrix representation can be further reduced.
+To summarise, the 2D dense matrix representation allows to represent the graph
+and support the required operators efficiently.
 
 
 % 180916 CK: I disabled the SkePU section for now,
