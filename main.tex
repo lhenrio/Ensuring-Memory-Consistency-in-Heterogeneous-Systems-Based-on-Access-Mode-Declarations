@@ -80,6 +80,7 @@
 \usepackage{etoolbox}
 \DeclareMathOperator{\range}{range}
 \DeclareMathOperator{\dom}{dom}
+\newcommand{\Overlap}[1]{O(#1)}
 
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -881,13 +882,12 @@ $\sigma'(x[i])=(I,V)$ which would invalidate the theorem.
 %approximations inspired from classical abstract interpretation techniques~\cite{Cous77} 
 %can be used except that the abstract view is computed dynamically but must stay 
 %consistent with the validity status of the real memory.
-\begin{Theorem}
+\begin{Theorem}\label{thm-correct-array}
 If a program using arrays is well-declared according to Definition~\ref{def:well-declared-array} then its execution verifies both the subject-reduction and the progress property.
 \end{Theorem}
 \subsection{Discussion: Similarities and differences relatively to VectorPU}
 
-\TODO{Christoph: read and comment/improve}
-\TODO{improve the link to SkePU (here or additional section earlier?) --- Looks fine to me in the current form.}
+
 
 Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-AM} (valid for simple memory locations or arrays), with the VectorPU implementation of the protocol for simple arrays, Figure~\ref{fig:vectorpucoherence}. Except from the order of operations and minor changes, the structure is the same and the form of operations is similar. The main difference is that there is no view of abstract vs. concrete variables, however, if we consider that transfer operations on abstract variables have no effect, and that validity status of concrete variables can be abstracted away, the code is  the same as the formalisation. 
 
@@ -946,26 +946,53 @@ paths of $S$, and thus for all $y$ overlapping $x$  we must have $(W\ \abs y \in
 The following definition describes how to extend a set of access mode declarations that does not take into account overlapping arrays and make it correct in presence of overlapping arrays.
 
 \begin{definition}[Extension of access mode declarations for overlapping arrays]\label{def-overlap-annotation}
- The extension for overlapping arrays of a set of access mode declarations  is the smallest set $\AM$ including the originally declared modes and closed under the following rules:
+Consider a set $\AM$ of access mode declarations.
+ The extension for overlapping arrays of $\AM$  is the smallest set $\Overlap \AM$ defined by the  rules in Table~\ref{Overlap-ext-tab}:
 
+\begin{table}[!htb]
 \begin{mathpar}
 \inferrule
+{E\ \abs x \in\AM}
+{E\ \abs x \in\Overlap \AM}
+
+\inferrule
+{\rem{E\ \abs x} \in\AM}
+{\rem{E\ \abs x} \in\Overlap \AM}
+
+
+\inferrule
 {W\ \abs x \in\AM \\ W\ \abs y \not\in\AM \\ x \text{ and } y \text{ overlap}}
-{RW\  \abs y \in\AM}
+{RW\  \abs y \in\Overlap \AM}
 
 \inferrule
 {RW\ \abs x \in\AM \\ x \text{ and } y \text{ overlap}}
-{RW\  \abs y \in\AM}
-\end{mathpar}
+{RW\  \abs y \in\Overlap \AM}
 
-Note that the application of these rules terminates provided the number of arrays is finite.
+\inferrule
+{\rem{W\ \abs x} \in\AM \\ \rem{W\ \abs y} \not\in\AM \\ x \text{ and } y \text{ overlap}}
+{\rem{RW\  \abs y} \in\Overlap \AM}
+
+\inferrule
+{\rem{RW\ \abs x} \in\AM \\ x \text{ and } y \text{ overlap}}
+{\rem{RW\  \abs y} \in\Overlap \AM}
+
+\end{mathpar}
+\caption{Extension of access mode annotations to deal with overlapping arrays}\label{Overlap-ext-tab}
+\end{table}
+
 \end{definition}
 
 The following theorem states that if the set of function parameters is extended according to the preceding extension, then memory consistency is ensured. Note that it means that a set of artificial parameters are to be added to some functions, in the sense that  data-transfers and validity status modifications might have to be performed on vectors that are not among the original parameters of the function.
 
-\begin{Theorem}[]
+\begin{Theorem}\label{thm-correct-array-overlap}
 Consider a program that is well-declared according to Definition~\ref{def:well-declared-array}, not taking into account  overlapping arrays. Suppose its access mode declarations are extended according to Definition~\ref{def-overlap-annotation} then the execution of the obtained program verifies both subject reduction and progress, even in presence of overlapping arrays.
 \end{Theorem}
+
+\begin{proof}[Proof sketch]
+The principle of the proof is to prove that, provided a set $\AM$ correctly declares the accesses performed syntactically by a function on its parameters, the set $\Overlap \AM$ is a correct approximation of the accesses performed by the function on all the arrays of the program, i.e. the parameter arrays and the arrays that overlap the parameter arrays. Then Theorem~\ref{thm-correct-array} will be  sufficient to conclude.
+
+It is easy to see that the first two rule of Table~\ref{Overlap-ext-tab} is sufficient to conclude about parameters arrays. We now need to ensure that operations on overlapping arrays are well-declared. We focus on non-remote operations and prove that (indirect) operations on overlapping arrays are well-declared, according to Definition~\ref{def:well-declared-array}. \TODO{not finished -- i should get back to the array case}
+\end{proof}
 
 \TODO{add proof elements}
 
