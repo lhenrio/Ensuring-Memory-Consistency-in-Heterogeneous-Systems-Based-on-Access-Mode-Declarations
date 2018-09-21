@@ -867,7 +867,7 @@ by $(V,I)$) at the end of the function execution. If we focus on the proof of
 Theorem~\ref{thm-SR}, case ``$x$ is written, sub-case (1) we have $\sigma'(\abs x)=(V,I)$ 
 which is a safe abstraction because \emph{all elements have been written}, and thus 
 $\sigma'(x[i])=(V,I)$ for all $i$. If one element $j$ was not written, we could have had 
-$\sigma'(x[i])=(I,V)$ which would invalidate the theorem.
+$\sigma'(x[i])=(I,V)$ which would invalidate the theorem. Indeed only arguments about correctness of the abstractions need to be adapted, and we can prove the following theorem.
 %
 %
 %\subsection{Towards Array Accesses: Adding an abstraction layer}
@@ -920,7 +920,8 @@ To take into account overlapping arrays in VectorPU, two approaches could be env
 For every $y$ overlapping $x$, if $i$ is in the range in common between $x$ and $y$, we have $w\ x[i]\in S \implies (W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$.
 \end{quote}
 
-Note that this restricts a bit the expressible effects as, for example. $W\ \abs x ; \rem{R}\ \abs y$ cannot be valid if $x$ and $y$ overlap.
+First note that no additional rule is necessary for read operations. Indeed, read operations use the validity status but do not modify it, consequently, read operations do not modify the validity status of other arrays and have no consequence on overlapping arrays.
+Note also that the above rule restricts a bit the expressible effects as, for example. $W\ \abs x ; \rem{R}\ \abs y$ cannot be valid if $x$ and $y$ overlap.
 
 
 \medskip
@@ -991,10 +992,14 @@ Consider a program that is well-declared according to Definition~\ref{def:well-d
 \begin{proof}[Proof sketch]
 The principle of the proof is to prove that, provided a set $\AM$ correctly declares the accesses performed syntactically by a function on its parameters, the set $\Overlap \AM$ is a correct approximation of the accesses performed by the function on all the arrays of the program, i.e. the parameter arrays and the arrays that overlap the parameter arrays. Then Theorem~\ref{thm-correct-array} will be  sufficient to conclude.
 
-It is easy to see that the first two rule of Table~\ref{Overlap-ext-tab} is sufficient to conclude about parameters arrays. We now need to ensure that operations on overlapping arrays are well-declared. We focus on non-remote operations and prove that (indirect) operations on overlapping arrays are well-declared, according to Definition~\ref{def:well-declared-array}. \TODO{not finished -- i should get back to the array case}
+Trivially, the first two rule of Table~\ref{Overlap-ext-tab} is sufficient to conclude about parameters arrays. We now need to ensure that operations on overlapping arrays are well-declared. We focus on non-remote operations and prove that (indirect) operations on overlapping arrays are well-declared, according to Definition~\ref{def:well-declared-array} modified by the additional rule introduced in above: 
+\begin{quote}
+For every $y$ overlapping $x$, if $i$ is in the range in common between $x$ and $y$, we have $w\ x[i]\in S \implies (W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$.
+\end{quote}
+It is easy to see that the access modes added by the four last rules of Table~\ref{Overlap-ext-tab} are sufficient to ensure this rule and the symmetrical one for remote writing.
 \end{proof}
 
-\TODO{add proof elements}
+
 
 \subsection{Towards an implementation in VectorPU}
 
