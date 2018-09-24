@@ -525,9 +525,9 @@ remote memory space.
 A program is a sequence of calls to functions or components (i.e., statements accessing 
 only real variables) 
 each protected by an access 
-mode declaration:
+mode declaration (on abstract variables representing the real variables):
 \[\Prog::=\AM_1\{S_1\};\AM_2\{S_2\};\ldots\]
-We write that $S\in S'$ if $S$ is one statement inside $S'$ (i.e. $S$ is a sub-term of 
+We write  $S\in S'$ if $S$ is one statement inside $S'$ (i.e. $S$ is a sub-term of 
 $S'$).
 
 We  define below the semantics of these programs  and specify well-declared program by 
@@ -847,7 +847,7 @@ to the rules of Definition~\ref{def-WD}, we have:
 \begin{itemize}
 \item $w\ x[i]\in S \implies (W\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
 \item $r\ x[i]\in S \implies (R\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
-\item $W\ \abs x\in \AM \implies \forall i\in\range(x). w\ x[i]$ occurs in all execution 
+\item $W\ \abs x\!\in\! \AM \!\implies\! \forall i\!\!\in\!\!\range(x).\, w\ x[i]$ occurs in all execution 
 paths of $S$,
 \item Plus the same rules for remote operations.
 \end{itemize}
@@ -940,17 +940,7 @@ Because we are only aware of an approximation of the effects (for each array var
 
 We consider $\AM$ the set of all access modes declared for a given function and extend it so that the function satisfies the well-declared program requirement even with overlapping arrays.
 
-To understand the principle of the approach, consider the case where 
-$W\ \abs x\in \AM$ then $ \forall i\in\range(x). w\ x[i]$ occurs in all execution 
-paths of $S$, and thus for all $y$ overlapping $x$  we must have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$. If we have no additional information we will ensure that $RW\ \abs y$ is also in $\AM$, which is always safe.
-
-The following definition describes how to extend a set of access mode declarations that does not take into account overlapping arrays and make it correct in presence of overlapping arrays.
-
-\begin{definition}[Extension of access mode declarations for overlapping arrays]\label{def-overlap-annotation}
-Consider a set $\AM$ of access mode declarations.
- The extension for overlapping arrays of $\AM$  is the smallest set $\Overlap \AM$ defined by the  rules in Table~\ref{Overlap-ext-tab}:
-
-\begin{table}[!htb]
+\begin{table}[!tb]
 \begin{mathpar}
 \inferrule
 {E\ \abs x \in\AM}
@@ -980,6 +970,16 @@ Consider a set $\AM$ of access mode declarations.
 \end{mathpar}
 \caption{Extension of access mode annotations to deal with overlapping arrays}\label{Overlap-ext-tab}
 \end{table}
+To understand the principle of the approach, consider the case where 
+$W\ \abs x\in \AM$ then $ \forall i\in\range(x). w\ x[i]$ occurs in all execution 
+paths of $S$, and thus for all $y$ overlapping $x$  we must have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$. If we have no additional information we will ensure that $RW\ \abs y$ is also in $\AM$, which is always safe.
+
+The following definition describes how to extend a set of access mode declarations that does not take into account overlapping arrays and make it correct in presence of overlapping arrays.
+
+\begin{definition}[Extension of access mode declarations for overlapping arrays]\label{def-overlap-annotation}
+Consider a set $\AM$ of access mode declarations.
+ The extension for overlapping arrays of $\AM$  is the smallest set $\Overlap \AM$ defined by the  rules in Table~\ref{Overlap-ext-tab}:
+
 
 \end{definition}
 
