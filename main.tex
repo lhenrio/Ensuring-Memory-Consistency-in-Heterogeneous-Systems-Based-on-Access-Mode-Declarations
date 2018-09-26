@@ -1005,45 +1005,112 @@ It is easy to see that the access modes added by the four last rules of Table~\r
 
 
 % Tell what is needed
-To implement the proposed mechanism that ensure the safety of overlapping vectors
-in a function call $f$, we need the two following components:
+To implement the proposed mechanism that ensure the safety of overlapping vector accesses
+in a function call $f$, we need to add to VectorPU the two following components:
 \begin{itemize}
-    \item A representation $r$ to encode the knowledge that for a given vector $v$,
-          which other components are overlapped with $v$.
-          At the vector declaration phase of a program,
-          the representation is constructed by overloading the vector constructor.
-          When a vector finishes its life cycle,
-          it is erased from the representation.
-    \item A mechanism which intercept the function call $f$,
-          look up in the representation $r$ all the overlapping vectors for every vector in the argument list
-          of the function call $f$. Then we perform the conservative coherence actions on those vectors\TODO{This should refer back to the technique in Theorem 4, i.e., automatically rewrite the given access mode R or W of an overlapping new operand pvector into RW, to be safe.} retrieved by the look-up.
-          To intercept the function call, the function call operator is overloaded.\TODO{Can such overloading be done automatically, without programmer assistance? - C.}
+    \item A representation $r_v$ that allows to retrieve, for any given \texttt{pvector} $pv$
+             of a \texttt{vector} $v$, the set of all other valid \texttt{pvector}s of $v$ 
+             that overlap with $pv$.
+             $r_v$ is initialized as empty when declaring a new vector $v$,
+             queried and/or updated at \texttt{pvector} creations, deletions, and at calls,
+             and is removed when $v$ is deallocated.
+          %At the vector declaration phase of a program,
+          %the representation is constructed by overloading the vector constructor.
+          %When a vector finishes its life cycle,
+          %it is erased from the representation.
+    \item A mechanism which intercepts the function call $f$ and,
+          for every vector operand (\texttt{vector} or \texttt{pvector}) $pv$ 
+          accessed as W or RW in $f$,
+          looks up in the corresponding representation $r_v$ all  
+          \texttt{pvector}s overlapping with $pv$. %for every vector $v$ in the argument list
+          %of the function call $f$. Then we perform the conservative coherence actions on those vectors\TODO{This should refer back to the technique in Theorem 4, i.e., automatically rewrite the given access mode R or W of an overlapping new operand pvector into RW, to be safe.} retrieved by the look-up.
+          For other arguments in $f$ that overlap with $pv$ and have access mode
+          R or W, their access mode
+          is updated to RW, as proposed in Table~\ref{Overlap-ext-tab}.
+          For any other existing \texttt{pvector}s $w$ of $v$ not accessed in $f$
+          (but possibly in earlier and/or later calls) 
+          that do overlap with $pv$, 
+          we append shadow arguments $RW(w)$ to $f$ as suggested by Table~\ref{Overlap-ext-tab}.
+          Finally, the intercept mechanism performs, as before, the resulting coherence
+          actions (data transfers, status updates) and delivers the call.
+          For intercepting the function call, the function call operator is overloaded.
+          %\TODO{Can such overloading be done automatically, without programmer assistance? - C.}
 \end{itemize}
 
+As a simple example, let us consider the following set of \texttt{pvector}s and call sequence:
+
+\begin{verbatim}
+v = new vector(10, ...);
+pv1 = new pvector( v, [2:5] );
+pv2 = new pvector( v, [4:8] );
+pv3 = new pvector( v, [7:9] );
+pv4 = new pvector( v, [2:3] );
+...
+f1( ... R(pv1), R(pv2), ... );
+f2( ... W(pv3) ... );  
+f3( ... RW(pv4), R(pv2), ... );
+\end{verbatim}
+
+Intercepting the function calls, we maintain $r_v$ and update the calls as 
+described above.
+For the call to \verb.f2., we infer from W(pv3) and the overlap of \verb.pv3. with \verb.pv2.
+by Table~\ref{Overlap-ext-tab} that the access mode of \verb.pv2. (not accessed in \verb.f2.) must be 
+upgraded to RW, which we do by conceptually appending \verb.RW(pv2).
+as a shadow argument to \verb.f2.. The call to \verb.f2. is thus
+conceptually rewritten\footnote{As all overlapping
+\texttt{pvectors} had been identified before the rewriting, the rule needs
+not be applied recursively to the appended shadow arguments, here \texttt{RW(pv2)}.} into
+
+\begin{verbatim}
+f2( ... W(pv3) ... , RW(pv2) ); 
+\end{verbatim}
+
+\noindent
+hence we make sure that the access to \verb.pv2. in the subsequent
+call to \verb.f3. will be handled correctly. 
+%This leads to invalidation of \verb.pv2., i.e., removal from $r_v$,
+%before delivering the actual call to \verb.f2..
+
+%Analogously, we infer at call \verb.f3. that \verb.pv1. must be
+%invalidated due to its overlap with argument \verb.pv4..
+ 
 % Summarise the requirement for data structure
-For the first component, we can see that a graph representation is needed
-\TODO{Why a graph? A simple ordered list (or interval tree, for optimization) of valid device copies (pvectors) should suffice? SkePU uses an ordinary list (C++ STL map) for this purpose.}.
-Given a simple three-vector set, one can easily construct a scenario
-that all three vectors overlap with each other in memory address ranges.\TODO{Hard to follow. If it is important, could you please show some example scenario?}
-For the second component, we notice that the insertion, deletion and the look-up operators is required.
-To summarise, we need a data structure that can represent a graph structure and support efficient insertion, deletion
-and the look-up operators.
+%For the first component, we can see that a graph representation is needed
+%\TODO{Why a graph? A simple ordered list (or interval tree, for optimization) of valid device copies (pvectors) should suffice? SkePU uses an ordinary list (C++ STL map) for this purpose.}.
+%Given a simple three-vector set, one can easily construct a scenario
+%that all three vectors overlap with each other in memory address ranges.\TODO{Hard to follow. %If it is important, could you please show some example scenario?}
+%For the second component, we notice that the insertion, deletion and the look-up operators is required.
+%To summarise, we need a data structure that can represent a graph structure and support efficient insertion, deletion
+%and the look-up operators.
 
 % given the requirement, select a data structure that fulfil the requirement
-We can choose dense 2-dimensional matrix to represent the graph.\TODO{Lu, please check if a graph is really necessary here. Also, I do not see how a fixed-size dense matrix could be used here, as valid copies are added and removed dynamically as GPU calls are executed. Or do I overlook something? - C.}
-We need to know the size of 2-dimensional matrix in advance.
-We assume the number of vectors in a program is reasonably small
-so that a dense matrix will not take noticeably large amount of memory
-and we can set in advance a reasonable number for the size,
-or rely on the static analysis of a compiler to estimate a conservative size value.
-The insertion of an overlapping array pair requires to write a 1 in a cell of the dense matrix,
-thus only takes $O(1)$ in time, the deletion operator requires to write a 0 in a cell
-thus also takes $O(1)$. The look-up operator only requires to return a row of the matrix,
-thus also takes $O(1)$. Since we only need a binary number in a cell of the matrix,
-thus the memory size of the dense matrix representation can be further reduced.
-To summarise, the 2D dense matrix representation allows to represent the graph
-and support the required operators efficiently.
+%We can choose dense 2-dimensional matrix to represent the graph.\TODO{Lu, please check if a graph is really necessary here. Also, I do not see how a fixed-size dense matrix could be used here, as valid copies are added and removed dynamically as GPU calls are executed. Or do I overlook something? - C.}
+%We need to know the size of 2-dimensional matrix in advance.
+%We assume the number of vectors in a program is reasonably small
+%so that a dense matrix will not take noticeably large amount of memory
+%and we can set in advance a reasonable number for the size,
+%or rely on the static analysis of a compiler to estimate a conservative size value.
+%The insertion of an overlapping array pair requires to write a 1 in a cell of the dense matrix,
+%thus only takes $O(1)$ in time, the deletion operator requires to write a 0 in a cell
+%thus also takes $O(1)$. The look-up operator only requires to return a row of the matrix,
+%thus also takes $O(1)$. Since we only need a binary number in a cell of the matrix,
+%thus the memory size of the dense matrix representation can be further reduced.
+%To summarise, the 2D dense matrix representation allows to represent the graph
+%and support the required operators efficiently.
 
+It remains to select an appropriate data structure for $r_v$ that allows for
+efficient dynamic insertion and removal of \texttt{pvector}s of a vector $v$, 
+i.e., index intervals, and efficient lookup of all pvectors that overlap
+with a given query interval.
+For very small numbers of \texttt{pvector}s of a vector $v$, a simple unordered
+list of \texttt{pvector}s is sufficient; this is used e.g.\ in the
+smart-container coherence management in SkePU \cite{Dastgeer-IJPP15}. 
+For scaling up to larger numbers of \texttt{pvector}s,
+a \emph{segment tree} \cite[Sec.~10.3]{Overmars} % : Segment Trees, pp.~224–227
+could be used. A segment tree storing $n$ intervals
+can be updated dynamically (insertion, removal) in time  $O(\log n)$ and
+can retrieve the set of all $k$ intervals overlapping with a query interval
+in time $O(k+\log n)$; the space requirements is $O(n\log n)$.
 
 % 180916 CK: I disabled the SkePU section for now,
 % as we now have the better VectorPU pvector use case instead.
