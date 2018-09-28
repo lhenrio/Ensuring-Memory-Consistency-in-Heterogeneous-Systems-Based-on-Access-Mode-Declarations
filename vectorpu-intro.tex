@@ -108,7 +108,7 @@ Section~\ref{sec:conclusion} concludes.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=0.62\textwidth]{img/CPU-GPU.png}
+\includegraphics[width=0.64\textwidth]{img/CPU-GPU.png}
 \caption{\label{fig:CPU-GPU}A GPU-based system with distributed address space}
 \end{center}
 \end{figure}
@@ -160,17 +160,16 @@ are expected to execute on the host, using one or possibly multiple cores.
 VectorPU \emph{components} are functions that are supposed to contain (CPU or device)
 kernel functionality and for which  operands are passed as VectorPU data container objects. 
 Components and the types of execution units that
-access their operands are implicitly marked 
+access their operands are declared 
 by annotating the operands of the function, either at a call of the function
 or for the formal parameters in the function's declaration, 
-with VectorPU \emph{access mode specifiers}.%
-\footnote{In contrast to e.g.\ SkePU \cite{Enmyren10} which overloads element
+with VectorPU \emph{access mode specifiers}.For example, in contrast,  SkePU \cite{Enmyren10}  overloads element
 access and iterator operations so that monitored 
 accesses are also possible on demand in non-componentized (i.e., 
-ordinary C++) CPU code,
+ordinary C++) CPU code.
 VectorPU only relies on access mode annotations 
 to perform lazy data transfer,
-not knowing when data is going to be accessed inside a component.}
+not knowing when data is going to be accessed inside a component.
 % however, SkePU knows by overloading element accesses.
 % By overloading element
 % access and iterator operations, 
@@ -178,9 +177,7 @@ not knowing when data is going to be accessed inside a component.}
 The access mode specifiers,
 such as \texttt{R} (read on CPU), \texttt{W} (write on CPU), \texttt{RW} 
 (update, i.e., both read and write, on CPU), \texttt{GR} (read on GPU) and so forth,
-are available both as annotations of function signatures%
-\footnote{The current VectorPU prototype implementation does not
-(yet) type-check access-mode annotations in signatures of externally defined functions.} and
+are available both as annotations of function signatures and
 as C++ preprocessor macros that expand at compilation into (possibly, device-specific) C++ pointer
 expressions and side effects that allow to generate device specific access code
 and use device-specific pointer types for the chosen execution unit. 
@@ -190,19 +187,20 @@ which might be dereferenced for GPU writing accesses to \texttt{x},
 such as the GPU code: \verb:*( GW(x) + 2 ) = 3.14:.
 \texttt{GWI(x)} evaluates to an Thrust-compatible iterator onto the 
 GPU device copy of \texttt{x}, and \texttt{WEI(x)} to an iterator-end reference
-to the last element of \texttt{x} on CPU side.
+to the last element of \texttt{x} on CPU side. The current VectorPU prototype implementation does not
+(yet) type-check access-mode annotations in signatures of externally defined functions.
 %
 It is also possible to specify partial access of a \verb:vector:
 % that expand into pointers to the first and last element
 % of an interval of elements to be accessed, 
 instead of the
-entire \verb.vector. data structure\footnote{The current
+entire \verb.vector. data structure. The current
 VectorPU implementation does not (yet) support coherence for 
 \emph{overlapping}
 intervals of elements resulting from multiple (partial) accesses
 some of which (may) access the same element.
 A solution for this problem has been described for SkePU
-smart containers by Dastgeer~\cite{Dastgeer-IJPP15}.}.
+smart containers by Dastgeer~\cite{Dastgeer-IJPP15}. Section~\ref{sec:overlap-array} details a solution for handling overlapping arrays in vectoruPU.
 %
 Table~\ref{tab:modes} summarizes the access mode annotations
 currently defined for VectorPU.
@@ -291,7 +289,7 @@ and \verb.thrust::sort. denotes the GPU sorting functionality
 provided by the Nvidia Thrust library. 
 
 % New 180916 CK:
-Using iterators, VectorPU allows to define references to
+Using iterators, it is possible to define, in VectorPU, references to
 contiguous subranges of a vector,
 called \textit{partial vectors} (\texttt{pvector}s), 
 which can be passed as \texttt{vector}-compatible

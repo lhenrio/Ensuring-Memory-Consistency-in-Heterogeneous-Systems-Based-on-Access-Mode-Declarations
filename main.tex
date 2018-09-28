@@ -172,10 +172,10 @@ data transfer \sep  software caching \sep  cache coherence
 
 In this section we provide a minimal calculus to reason on the memory operations that can 
 exist in a framework that deals with memory consistency like VectorPU. We first define a 
-set of effects operations can have on the consistency of the memory. Then we define a 
+set of effects that operations can have on the consistency of the memory. Then we define a 
 small calculus expressing different memory accesses and their composition into complex 
 procedures. Finally, we express VectorPU operations as higher-level statements that can 
-be translated  into the core calculus presented before, and show that if all memory 
+be translated  into the core calculus, and show that if all memory 
 accesses are annotated correctly through VectorPU annotations the program cannot try to 
 access an invalid data and the memory spaces are put in coherence when needed. We also 
 show that VectorPU tracks the validity status of the memory adequately. In this 
@@ -239,8 +239,8 @@ w: (X,Y)\mapsto (V,I)
 These signatures are effects  expressing that
 $r$ is a reading operation requiring validity of data and ensuring not to modify it, 
 the distant status is unchanged; $w$ 
-is a  writing operation that modifies data locally but do not require validity, they 
-invalidate the remote memory.  \Push\ uploads the local memory and thus makes valid the 
+is a  writing operation that modifies data locally but do not require validity, it 
+invalidates the remote memory.  \Push\ uploads the local memory and thus makes valid the 
 distant memory; 
 it requires that the data is locally valid, and \Pull\ is the symmetrical operation.
 
@@ -248,7 +248,7 @@ An additional operation could be defined:
  an 
 $rw$ operation would represent a read and/or write access, it would both require data 
 validity and invalidate 
-remote status: $(V,X)\mapsto (V,I)$. This operation is however not needed here.
+remote status: $(V,X)\mapsto (V,I)$. This operation is however not needed here but we will have a similar one at the annotation level, see below.
 
 \subsection{A language for modelling consistency and effects}\label{sec-core}
 We now create a core calculus to be able to reason on programs involving sequences of 
@@ -266,7 +266,7 @@ $\Push,$ $\Pull,$ $\noop\}$.
 
 We are  interested  in conditionals dealing 
 with the validity status of the variables. Other conditionals  are expressed as a generic 
-binary operator $\oplus$ but other operators with different arities could be added as 
+binary operator $\oplus$ but  operators with different arities could be added as 
 well:
 \[\cond::=\isvalid~x~|~\isremvalid~x~|~x\oplus y\]
 %$\oplus$ replaces operations on values; we are not interested in evaluating them ; only 
@@ -285,7 +285,7 @@ sequence nor \noop. $\sigma[x\mapsto (X,Y)]$ is the update operation on maps.
 %pairs is extended to store (it swaps the value associated to each variable)
 
 
-\begin{figure*}[tb]
+\begin{figure*}[tp]
 \begin{mathpar}
 \inferrule[valid]
 {\sigma(x)=(V,X)}
@@ -319,6 +319,8 @@ sequence nor \noop. $\sigma[x\mapsto (X,Y)]$ is the update operation on maps.
 \inferrule[While-False]
 {\neg\feval{\cond}{\sigma} }
 {(\while(\cond) S;S',\sigma)\to (S',\sigma)}
+
+\\
 
 \inferrule[IF-True]
 {\feval{\cond}{\sigma} }
@@ -366,7 +368,7 @@ applied on $(S,\sigma)$.
  A configuration is stuck if the validity status of the accessed variable is 
 incompatible with the effect to be applied\footnote{We say that there is no unification  between $X$ and $Y$ if one of the two variables must have the value $V$, and the other one the value $I$. This relation is extended to pairs of variables.}:
 \[\begin{array}{@{}l@{}}
-(S,\sigma)\not\to\ \iff\\
+(S,\sigma)\not\to\ \iff~
  \begin{array}[t]{@{}l@{}}
 S=E~x;S' \land \sigma(x)=(X,Y) 
 							\land E:  (X',Y')\mapsto (Z,T)\ 
@@ -402,7 +404,7 @@ It is impossible to reach an unsafe state from the initial state.
 \begin{proof}[Proof sketch] 
 Unsafe states are avoided  because of the effects of operations: 
 only effect rules modify the store and no effect can reach $(I,I)$, except 
-\noop\ starting from $(I,I)$.
+\noop\ starting from $(I,I)$, whic is sufficient to conclude as the inital state is not $(I,I)$.
 \end{proof}
 
 \noindent
@@ -410,8 +412,8 @@ only effect rules modify the store and no effect can reach $(I,I)$, except
     $w x;\rem{r~x}$ cannot be fully evaluated. Indeed, $(w x;\rem{r~x},(x\mapsto 
     (V,I)))\to (\rem{r~x},(x\mapsto (V,I)))$, but  $\rem{r~x}$ requires that $x$ is 
     mapped to $(X,V)$ for some $X$ which is not the case.
-However if we add a \Push\ operation to ensure the validity of the read memory the 
-program $w~x;Push;\rem{r~x}$ can be reduced:\\
+However if we add a \Push\ operation to ensure the validity of the accessed memory the 
+program $w~x;Push;\rem{r~x}$ can be reduced as follows:\\
 $(w x;\rem{r~x},(x\mapsto (V,I)))\\~\qquad\to (\Push;\rem{r~x},(x\mapsto 
 (V,I)))\\~\qquad\to 
 (\rem{r~x},(x\mapsto (V,V)))\to (\noop,(x\mapsto (V,V)))$
@@ -503,14 +505,14 @@ have a single representative for the whole array.
 \item It is safe to ``forget'' that one memory space holds a valid copy of the data if 
 the other memory space has a valid one. In other words, $(V,I)$ (resp. $(I,V)$) is a safe 
 abstraction of $(V,V)$ and we denote $(V,I)\leq (V,V)$ (resp. $(I,V)\leq (V,V)$). Of 
-course, we have $(X,Y)\leq (X,Y)$ for all $X$ and $Y$.
+course, we have $(X,Y)\leq (X,Y)$ for any $X$ and $Y$.
 \end{itemize}
 
 \paragraph{Syntax}
 We now define access mode declarations:\\[-3.3ex]
 \begin{align*}
-\AM&::=R\ \abs x \,|\, W\ \abs x \,|\, RW\ \abs x \,|\, \\
-&~\rem{R\ \abs x} \,|\,\rem{W\ \abs x} \,|\,\rem{RW\ \abs x} \,|\, \\
+\AM&::=R\ \abs x \,|\, W\ \abs x \,|\, RW\ \abs x \,|\, 
+\rem{R\ \abs x} \,|\,\rem{W\ \abs x} \,|\,\rem{RW\ \abs x} \,|\, \\
 &~ \AM \land \AM' \quad \text{(where variables in $\AM$ and $\AM'$ are disjoint)}
 \end{align*}
 
@@ -539,25 +541,7 @@ triggered
 before each function 
 execution.
 
-\begin{figure*}[tb]
-\begin{mathpar}
-\transl{R~\abs x}=(\IF{\isvalid~\abs x}{\noop}{(\Pull~x;\Pull~\abs x)})
 
-\transl{\rem {R~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)})
-
-\transl{RW~\abs x}=(\IF{\isvalid~x}{\noop}{(\Pull~x;\Pull~\abs x)});w~\abs x
-
-\transl{\rem{RW~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)});\rem{w~\abs 
-x}
-
-\transl{W~\abs x}= w~\abs x
-
-\transl{\rem{W~\abs x}}= \rem{w~\abs x}
-
-\transl{\AM_1\{S_1\};\AM_2\{S_2\};\ldots} = \transl{\AM_1};S_1;\transl{\AM_2};S_2;\ldots
-\end{mathpar}
-\caption{Semantics of access modes and programs}\label{sem-AM}
-\end{figure*}
 \paragraph{Extension of statements to abstract variables}
 When evaluating a program, the store contains both real and abstract variables, and the 
 existing 
@@ -579,7 +563,26 @@ The validity status is stored in the CPU address space in VectorPU. Comparing th
 status of real memory and their representative  allow us to reason 
 formally on the correctness of the validity tracking performed by VectorPU.
 
-As no data is accessed by the effects on abstract variables, they cannot create stuck configuration. We will not use $r~\abs x$ as it does not 
+\begin{figure*}[tb]
+\begin{mathpar}
+\transl{R~\abs x}=(\IF{\isvalid~\abs x}{\noop}{(\Pull~x;\Pull~\abs x)})
+
+\transl{\rem {R~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)})
+
+\transl{RW~\abs x}=(\IF{\isvalid~x}{\noop}{(\Pull~x;\Pull~\abs x)});w~\abs x
+
+\transl{\rem{RW~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)});\rem{w~\abs 
+x}
+
+\transl{W~\abs x}= w~\abs x
+
+\transl{\rem{W~\abs x}}= \rem{w~\abs x}
+
+\transl{\AM_1\{S_1\};\AM_2\{S_2\};\ldots} = \transl{\AM_1};S_1;\transl{\AM_2};S_2;\ldots
+\end{mathpar}
+\caption{Semantics of access modes and programs}\label{sem-AM}
+\end{figure*}
+As no data is accessed by the effects on abstract variables, they cannot create stuck configuration. Consequently, $r~\abs x$ has no effect as it does not 
 change the validity 
 % Comment: This is only because VectorPU uses the most primitive
 % cache coherence protocol, the MI (VI) protocol.
@@ -630,7 +633,7 @@ more read or $RW$ accesses that what is done in practice, and one can declare a 
 and/or write 
 access if only read or write is performed. Additionally, the annotation $W$ denotes an 
 \emph{obligation} to write which allows the consistency mechanism to avoid any validity 
-checks before running the function that will overwrite the data. 
+check and any transfer before running the function that will overwrite the data. 
 To represent this concept, we need a first definition that states that an operation will be performed in all execution paths of a (bigger) statement. This 
 definition 
 formalises a classical static analysis concept that states that all branches of 
@@ -644,7 +647,7 @@ initial store $\sigma_0$, for all full reductions
 $(S_0,\sigma_0)\to(S_1,\sigma_1)\to\ldots\to(\noop,\sigma_n)$, there is an intermediate 
 state $(S_i,\sigma_i)$ such that $S_i=S;S''$ for some $S''$.
 \end{definition}
-Notice that an operation $S$ may appear in some of the execution paths of $S'$ if  $S\in 
+Notice that an operation $S$ can only appear in some of the execution paths of $S'$ if  $S\in 
 S'$: if $(S_0,\sigma_0)\to^* (S;S',\sigma)$ then $S\in S_0$.
 
 
@@ -831,7 +834,7 @@ element of the array. More precisely the new operations on arrays and their elem
 Synchronisation operations (\Push\ and \Pull) exist for arrays but the whole array is 
 synchronised, and we write $\Push~x$ and $\Pull~x$ as above.
 All the elements of the array are represented by a single abstract variable: $\abs{x}$ 
-represents the validity status of all $x[i]$.
+represents a safe abstraction of the validity status of all $x[i]$. In other words, as soon as one element of the array $x$ is invalid locally (resp. remotely) the validity status of $\abs x$ can only be $(I,V)$ (res. $(V,I)$).
 
 The semantics of access mode declarations and programs is unchanged because 
 synchronisation operations and access mode declarations do not concern array elements.
@@ -867,7 +870,7 @@ by $(V,I)$) at the end of the function execution. If we focus on the proof of
 Theorem~\ref{thm-SR}, case ``$x$ is written, sub-case (1) we have $\sigma'(\abs x)=(V,I)$ 
 which is a safe abstraction because \emph{all elements have been written}, and thus 
 $\sigma'(x[i])=(V,I)$ for all $i$. If one element $j$ was not written, we could have had 
-$\sigma'(x[i])=(I,V)$ which would invalidate the theorem. Indeed only arguments about correctness of the abstractions need to be adapted, and we can prove the following theorem.
+$\sigma'(x[i])=(I,V)$ which would invalidate the theorem. Overall, only arguments about correctness of the abstractions need to be adapted, and we can prove the following theorem.
 %
 %
 %\subsection{Towards Array Accesses: Adding an abstraction layer}
@@ -895,9 +898,9 @@ Taking a more global point of view, no verification is performed by the VectorPU
 
 Finally concerning expressiveness, the ``well-declared programs'' definition is a bit more flexible than what VectorPU targets at the moment because it is safe to declare in our framework functions that access some variables on the CPU and others on the GPU, and this is not planned in VectorPU, again due to the supported usage scenario.
 
-These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. We consider the theoretical results below as a specification of a future extension of the library.
+These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. We can somehow consider the theoretical results below as a specification of a future extension of the library.
 
-\section{Overlapping arrays}
+\section{Overlapping arrays}\label{sec:overlap-array}
 
 In the preceding section we supposed that arrays were well-separated. The preceding abstraction would also be valid for an array that would be split into disjoint entities (such as
 VectorPU \texttt{pvector}s) and always used either as the disjoint sub-arrays or as the whole. In this section we extend the framework to take into account overlapping arrays. Here we still consider single dimension arrays for simplicity but multi-dimensional arrays could easily be taken into account.
@@ -906,7 +909,7 @@ VectorPU \texttt{pvector}s) and always used either as the disjoint sub-arrays or
 
 In VectorPU, the first \texttt{pvector} on a vector passed as argument for access on device will (over)allocate space for the entire \texttt{vector}, all subsequent \texttt{pvector} accesses to the same \texttt{vector} can skip the allocation.
  Consequently, two successive data transfers of the same memory location will be written to the same memory location, even if the two initial locations are accessed through different (overlapping) \texttt{pvector}s.
-Consequently, on the formal side, if several push or pull are performed on overlapping memory locations, the transferred memory has the same overlaps as the source.
+Consequently, on the formal side, if several push or pull are performed on overlapping memory locations, the transferred memory has the same overlaps as the source. This is very important to ensure that no two copies of the same array element will coexist in the same location.
 
 \paragraph{Problem statement}
 Overlapping arrays raises several difficulties making the approach currently adopted in VectorPU not adapted. Indeed a single write operation can change the validity status of a cell that belongs to several arrays. Consequently, several access annotations may have to be written for a single operation. As a consequence, some annotations may never be correct: a function that is declared to write all the elements of an array $x$ will necessarily write some elements of the arrays that have an overlap with $x$, these overlapping arrays should thus be annotated and transmitted, or another coherence protocol should be used.
@@ -927,7 +930,7 @@ Note also that the above rule restricts a bit the expressible effects as, for ex
 \medskip
 
 Though very precise, this approach does not seem realistic and we additionally develop an inference mechanism for access mode declarations in presence of overlapping arrays.
-The objective of this second approach is to infer the correct annotations on  variables that are not passed as parameters. Knowing the access modes for the function parameters, we infer what operation must be done on other intersecting arrays. This is expressed as additional access mode declarations that are inferred, the semantics of these added declarations will result in additional data transfers and validations/invalidations that make the program correct. This is less precise as it takes a pessimistic approach on the operations performed by the declared arrays. For example, for any array that is declared $RW$ we will suppose that all the array elements may be read and written, but the approach is safe and mostly automatic. This is presented in Section~\ref{sec:infer-overlap} below.
+The objective  is to infer the correct annotations on  variables that are not passed as parameters. Knowing the access modes for the function parameters, we infer what operation must be done on other intersecting arrays to ensure the coherency of the system, and we express these additional operations as implicit generated annotations. These additional access mode declarations are inferred, the semantics of these added declarations will result in additional data transfers and validation/invalidation operations that make the program correct. This is less precise as it takes a pessimistic approach on the operations performed by the declared arrays. For example, for any array that is declared $RW$ we will suppose that all the array elements may be read and written, but the approach is safe and mostly automatic. This is presented in Section~\ref{sec:infer-overlap} below.
 %
 %Another way to see the next two subsection is that the first one extends the well-declared definition for overlapping arrays, and the second one defines an inference mechanism that ensures that a function is well-declared in presence of overlapping arrays, provided the declaration is correct not taking overlapping arrays into consideration, i.e. in the sense of Definition~\ref{def:well-declared-array}.
 
@@ -972,18 +975,17 @@ We consider $\AM$ the set of all access modes declared for a given function and 
 \end{table}
 To understand the principle of the approach, consider the case where 
 $W\ \abs x\in \AM$ then $ \forall i\in\range(x). w\ x[i]$ occurs in all execution 
-paths of $S$, and thus for all $y$ overlapping $x$  we must have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$. If we have no additional information we will ensure that $RW\ \abs y$ is also in $\AM$, which is always safe.
+paths of $S$, and thus for all arrays $y$ overlapping $x$  we must have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$. If we have no additional information we will ensure that $RW\ \abs y$ is also in the set of access mode declarations, which is always safe.
 
-The following definition describes how to extend a set of access mode declarations that does not take into account overlapping arrays and make it correct in presence of overlapping arrays.
 
 \begin{definition}[Extension of access mode declarations for overlapping arrays]\label{def-overlap-annotation}
 Consider a set $\AM$ of access mode declarations.
- The extension for overlapping arrays of $\AM$  is the smallest set $\Overlap \AM$ defined by the  rules in Table~\ref{Overlap-ext-tab}:
+ The extension for overlapping arrays of $\AM$  is the smallest set $\Overlap \AM$ defined by the  rules in Table~\ref{Overlap-ext-tab}.
 
 
 \end{definition}
 
-The following theorem states that if the set of function parameters is extended according to the preceding extension, then memory consistency is ensured. Note that it means that a set of artificial parameters are to be added to some functions, in the sense that  data-transfers and validity status modifications might have to be performed on vectors that are not among the original parameters of the function.
+The following theorem states that if the set of function parameters is extended according to the preceding extension, then memory consistency is ensured. Note that it means that a set of artificial parameters are to be added to some functions, in the sense that  data-transfers and validity status modifications  have to be performed on vectors that are not among the original parameters of the function.
 
 \begin{Theorem}\label{thm-correct-array-overlap}
 Consider a program that is well-declared according to Definition~\ref{def:well-declared-array}, not taking into account  overlapping arrays. Suppose its access mode declarations are extended according to Definition~\ref{def-overlap-annotation} then the execution of the obtained program verifies both subject reduction and progress, even in presence of overlapping arrays.
@@ -992,11 +994,11 @@ Consider a program that is well-declared according to Definition~\ref{def:well-d
 \begin{proof}[Proof sketch]
 The principle of the proof is to prove that, provided a set $\AM$ correctly declares the accesses performed syntactically by a function on its parameters, the set $\Overlap \AM$ is a correct approximation of the accesses performed by the function on all the arrays of the program, i.e. the parameter arrays and the arrays that overlap the parameter arrays. Then Theorem~\ref{thm-correct-array} will be  sufficient to conclude.
 
-Trivially, the first two rule of Table~\ref{Overlap-ext-tab} is sufficient to conclude about parameters arrays. We now need to ensure that operations on overlapping arrays are well-declared. We focus on non-remote operations and prove that (indirect) operations on overlapping arrays are well-declared, according to Definition~\ref{def:well-declared-array} modified by the additional rule introduced in above: 
+Trivially, the first two rules of Table~\ref{Overlap-ext-tab} are sufficient to conclude about normal function parameters. We now need to ensure that operations on overlapping arrays are well-declared. We focus on non-remote operations and prove that (indirect) operations on overlapping arrays are well-declared, according to Definition~\ref{def:well-declared-array} modified by the additional rule introduced in above: 
 \begin{quote}
 For every $y$ overlapping $x$, if $i$ is in the range in common between $x$ and $y$, we have $w\ x[i]\in S \implies (W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$.
 \end{quote}
-It is easy to see that the access modes added by the four last rules of Table~\ref{Overlap-ext-tab} are sufficient to ensure this rule and the symmetrical one for remote writing.
+By a simple case analysis on the possible annotations and the possible operations performed on the arrays, we deduce that the access modes added by the four last rules of Table~\ref{Overlap-ext-tab} are sufficient to ensure this rule and the symmetrical one for remote writing.
 \end{proof}
 
 
@@ -1011,7 +1013,7 @@ in a function call $f$, we need to add to VectorPU the two following components:
     \item A representation $r_v$ that allows to retrieve, for any given \texttt{pvector} $pv$
              of a \texttt{vector} $v$, the set of all other valid \texttt{pvector}s of $v$ 
              that overlap with $pv$.
-             $r_v$ is initialized as empty when declaring a new vector $v$,
+             $r_v$ is initialized as empty when declaring a new \texttt{vector} $v$,
              queried and/or updated at \texttt{pvector} creations, deletions, and at calls,
              and is removed when $v$ is deallocated.
           %At the vector declaration phase of a program,
@@ -1126,10 +1128,10 @@ in time $O(k+\log n)$; the space requirements is $O(n\log n)$.
 Most of the verification works related to memory consistency focus on coherence 
 protocols 
 and/or 
-weak memory models. 
+weak memory models~\cite{pong1997verification}. 
 Among them, one could cite~\cite{Gerth1999}, a formal specification of a caching 
 algorithm, and its verification in TLA~\cite{Ladkin1999}. These works shows the 
-difficulty on reasoning on memory coherency, but also that specifications in these models 
+difficulty to reason on memory coherency, but also that specifications in these models 
 should rely on a few simple instructions on the type of memory accessed, a bit similarly 
 to this proposal.
 Coherence protocols have also been verified using CCS specifications~\cite{Barrio01}. 
@@ -1141,13 +1143,13 @@ that each component accesses a valid memory space.
 More recently, and adopting a more language oriented approach, Crary and 
 Sullivan~\cite{Crary:POPL:2015} designed 
 a calculus for expressing ordering of memory accesses in weak memory models, however we 
-are interested here in a much simpler problem where memory access is somehow sequential 
+are interested here in a much simpler problem where memory access is  sequential 
 and clearly identified. 
-Even a  extension of this work for parallel processes would  result in a 
+Even an  extension of this work for parallel processes would  result in a 
 simpler model than the ones that exist for weak memory models because of the explicit 
 consistency points introduced in the execution by the start/end of each function. 
 
-The closest work to ours are probably~\cite{BJPTSAC16} that define a memory access calculus similar to ours and prove the 
+The closest work to ours is probably~\cite{BJPTSAC16} that defines a memory access calculus similar to ours and prove the 
 correctness of a generic cache coherence protocol expressed as part of the semantics of 
 the calculus. Compared to this work, we are interested in explicit statements on memory 
 accesses and thus the cache consistency is partially ensured  by the programmer 
@@ -1162,7 +1164,7 @@ optimisations and the impact of the memory organisation on performance in the co
 cache coherent multicore architectures. This could be an interesting starting point for 
 future works, especially if we 
 extend our work to better model the performance aspects of VectorPU and want to reason 
-formally on the improved performance obtained by the library.
+formally on the improved performance obtained by the library. Also from the same authors~\cite{Bijo2017} extends the results described above with parallel spawned task and could be a source of inspiration  to extend our work towards parallel function execution.
 
 \section{Conclusion and future works}\label{sec:conclusion}
 In this article we provided a formal approach to verify the consistency of the memory 
@@ -1214,9 +1216,8 @@ cache coherence protocol, the VI-protocol.
  introduce additional states where the
  number of readers has to be tracked for example. 
  Also, SkePU uses a more space-efficient management of
- partial vector accesses, allowing multiple overlapping
- copies to co-exist on the same device, such that the
- coherence protocol involves intersection tests with
+ partial vector accesses, the
+ coherence protocol itself involves explcitly intersection tests with
  existing copies. 
  Verifying such framework would require 
  a modification of our abstract state representation and a modification of the access 
