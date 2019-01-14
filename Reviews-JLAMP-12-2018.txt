@@ -1,0 +1,115 @@
+-Reviewer 1
+
+  -
+
+This paper is an extension to:
+"Ensuring Memory Consistency in Heterogeneous Systems Based on Access mode Declaration"
+
+In addition to the details that were not provided by the original article due to the limit of space, the authors propose two extensions:
+the link between the formalization and the actual implementation of VectorPU,
+a generalization to overlapping arrays.
+The paper is well explained and the approach quite intuitive. The proofs and sketch of proofs are enough detailed so the reader get the idea of the approach and why it works.
+
+I still have some minor remarks.
+
+In VectorPU, the annotations are based on macros. I had a look to the implementation. While the expansion of the macros is straightforward for function calls, this is not the case for function parameters. Maybe it could be useful to have an example of expanded macro (even if some elements are simplified), just to catch the idea that each macro creates behind the scene a pointer to a particular memory regions with the corresponding access, etc.
+---> Christoph
+
+On a related topic, I am not sure to see why VectorPU cannot enforce (at least partially), the "well-declared program" definition. Basically:
+the absence of push/pull could be ensured by hidding the transfer functions in the API *,
+the read/write control is ensured by const-correctness, and pointer comparisons seems to be enough to ensure the restriction saying that a variable cannot appear twice in parameters.
+* of course that does not prevent one to break it willingly, but we want to protect from Murphy, not from Machiavelli.
+--> say a word about this, but I believe const/cprrectness is wrong
+
+The remaining case to control is the proposition:
+W x# \in M ==> w x occurs in all execution paths of S.
+And here, I am not sure to understand. Does that mean that each memory region accessible from the (write-only) input parameters must be written? That seems to be a strong constraint (even if, indeed most of the time, the targeted code just write buffers unconditionally, but maybe it should mentioned). If it is the reason why the well-defined property cannot be enforced, I think that it should be pointed out.
+--> yes and no it is not the only reason
+
+Q: p9 about the "waste device memory space". Do you know if in such a case, the device can somewhat virtualize the memory by only allocating the memory if a data-transfer is initiated? 
+--> Christoph?
+
+On the symmetry between Push and Pull, intuitively I would write Pull x = rem(Push x). Maybe a footnote could confirm such an intuition (or say that I am wrong).
+--> right ADD
+
+About the fact that "In a set of access mode declaration, the same variable cannot appear twice", in the case of VectorPU, I would intuitively say that the "variable" is closer to the idea of memory location. Saying that basically, a memory location can only appear once (it would be the notion of "restrict"ed pointer in C). Provided that the extension of your formalism to overlapping vectors allows (and in fact even requires) to list all possibly impacted vectors in parameters, I think that something could be clarified:
+either if multiple pvectors talk about the same underlying vector, the access mode only appear once in the access mode declaration*,
+or this extension allow the presence of the memory location multiple times and the new approach is more general (even if it relies on over-approximation).
+*and that means that the macros of VectorPU and the ones in the formalism do not really have the same meaning anymore.
+--> clarify that this is the formalisation and clarify that you can have the same vars as soon as you have the same access declaration
+
+
+For readability:
+p6, first §: I suggest to put the last sentence "Table 1 summarizes ..." at the beginning of the paragraph
+p7, § about partial vectors: I would suggest to either give an example now, or to simply removes this paragraph (and keep the details in the section about pvectors),
+p10+: In S, E x  suggests that Push/Pull/Noop are used with an associated variable, but it is not always consistent in the article (e.g. Example p14),
+p21: § before Theorem 3, in the sentence "The only change ..." a direct link to the "correct abstraction of the memory state" definition could ease the understanding,
+p24: "W x# ; rem(R) y# cannot be valid" could be detailed.
+p24: last § of section 4.1 : maybe put the paragraph at the beginning of 4.2, avoiding the "Section 4.2 below".
+In references, I would suggest to remove URLs that are based on the DOI that is already provided.
+
+Typos:
+p5 : ... access mode specifiers.For (missing space),
+p5 : ... to an Thrust compatible (a)
+p6 : vectoruPU
+p8 : Fig 2 : indentation of if-blocks
+p10 : Z, T are not used here, so maybe it is not necessary to talk about them (you re-introduce these names latter when needed),
+p11 : where E x (a space appears at the beginning)
+p30 : explcitly
+
+-Reviewer 2
+
+  -
+Summary
+The paper presents an approach for verifying VectorPU, a cache coherence protocol between two remote memory spaces, that uses untyped light-weight annotations, which are not suitable for standard static analysis evaluations. To do so the authors assign to a memory location labeled by a variable an abstract value, which is described by a tuple representing validity statuses of the memory location on the local and the remote memory spaces. Then the authors define the set of five operations and their effects on the abstract values. Next the paper describes a language and operational semantics for variables’ validity statuses. The authors further extend the formalism to take into account accesses to arrays and overlapping arrays, and use the formalism to define well-declared programs and prove desired properties of well-declared programs.
+
+Review
+The authors address an important problem of verifying a cache coherence protocol and provide proper motivation and the background for their work. The formalism presented in Sections 3.1 and 3.2 is well written (except for minor comments as outlined below), adequately defined and properly explained. However, starting with Section 3.3  it seems that the quality of the presentation decreased. First of all, the motivation for introducing abstract variables should be explained on a concrete example, i.e., the array as the paper presents later on p16. Also the notion of abstract variables should be better defined. Otherwise it is not clear (until later) that one abstract variable can represent several concrete ones. It was not clear how abstract variables are introduced. Is it in the code? How the mapping between abstract and concrete variables is created? The rest of the paper that talks about arrays and the extension to the overlapping array are adequately presented. Perhaps the authors could in their next revision improve the introduction of abstract variables.
+--> Ludo: explain better abstract variables --> arrays
+
+Here are some specific points:
+Section 3.2 should be more consistent. After the grammar it says E x denotes some effect E on variable x, while before E was defined as an operation. The definition of E (on the previous page) should be labeled and referenced here.
+--> LUDO unify (I thought we already unified)
+
+Operational semantic for remote effect should be highlighted for the reader pointing out the fact that the validity values are switched.
+--> LUDO: in text but I thought it was there: insist
+
+Extended proofs should be presented (it is a journal paper with generous page limits).
+
+Concept of unification between two abstract states is not defined before it is used in Property 1.
+--> LUDO: explain informally
+
+Definition 3 range(x) is not defined.
+--? LUDO ok
+
+Theorem 3 is missing a proof.
+--> proof sketch
+
+Minor
+
+P.11, last paragraph : “..., we suppose additional rules ...“ -> “..., we assume additional rules ..”
+P.14, in Proof sketch “, whic” -> “, which”
+Figure 4, in the first formulae, shouldn’t isValid be performed on x (as on the rest of the formula) instead of x#
+P. 28 The first sentence in the 2nd paragraph from the bottom of the page “Most recently ..” needs to be rewritten.
+P. 28 The first sentence in the 1st paragraph from the bottom of the page “... prove … “ -> “ … proves …”
+
+
+-Reviewer 3
+
+  -
+ 
+The paper extends the works presented in the reference [5] by considering also the case of overlapping arrays in the theoretical framework that is proposed there.  Also, the impact of using this framework on the behavior of the VectorPU library  is analyzed in more details. The overlapping arrays are not yet supported by VectorPU, so this case is discussed only theoretical.
+ 
+These extensions should be also emphasized in the abstract of this paper which is now exactly the abstract of the paper presented at HPCS2018!
+--> NO but perhaps we only added stuff and kept parts unchanged though -> rework the abstract and add smthing about the link with vectorpu
+ 
+The paper is well written, and the goal of formalizing the operations of memory accesses and memory synchronization between two memory spaces (CPU-GPU) is worth to be more investigated since it could help to prove that a program adequately annotated will always access valid memory spaces and tracks correctly which of the memory space contains the up-to-date data.
+ 
+The work presented in the conference paper is very much related to VectorPU library (an open-source1lightweight C++-only high-level programming layer for writing single-source heterogeneous programs for Nvidia CUDA GPU-based systems). Still, a general simple system modeling the semantics of memory accesses and communication in a CPU-GPU heterogeneous system, and a small calculus expressing different memory accesses and their composition across program traces are introduced. Since VectorPU operations are then translated into the core calculus, this could be used to prove that, if all memory accesses are performed through VectorPU operations, the memory cannot reach an inconsistent state and all memory accesses succeed. 
+ 
+The concrete impact of the proposed theoretical calculus on  using VectorPU is  very important. But, the property of “well-declared programs" is not checked yet by the framework, and so the property must be ensured by the programmer. Only a discussion about the possible approaches for these verifications inside the framework is introduced.
+ 
+Some concrete small examples would be useful!
+--> LUDO: see what we can do
+ 
+ 
