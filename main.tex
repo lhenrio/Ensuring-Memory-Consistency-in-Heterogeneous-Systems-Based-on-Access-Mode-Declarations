@@ -686,10 +686,14 @@ status of the
 memory. This is expressed as a theorem that is similar to subject-reduction in type 
 systems, it states that if the status of the abstract variables represent correctly the 
 validity status of the real variables, then the 
-abstraction is also correct after the execution of a  well-declared function.  Let us say 
-that  we have a \emph{correct abstraction of the memory state} if for each real memory 
+abstraction is also correct after the execution of a  well-declared function.  We first define the correctness of the representation of the validity status.
+\begin{definition}[Correct abstraction of the memory state]\label{CorrectAbstraction}
+We have a \emph{correct abstraction of the memory state} if for each real memory 
 location, the abstract representative of this location has a validity status that is an 
-approximation, in the sense of $\leq$, of the validity status of the real memory. The 
+approximation, in the sense of $\leq$, of the validity status of the real memory. More formally, $\sigma$ stores a correct abstraction of the memory state if (recall $\abs x$ stores the validity information for $x$):
+\[ \forall x\in \dom(\sigma).\, \sigma(\abs x)\leq\sigma(x) \]
+\end{definition}
+ The 
 theorem below states that the execution of a well-declared function maintains the 
 correctness of the memory state 
 abstraction. 
@@ -859,7 +863,7 @@ Where $\range(x)$ is the set of valid
 
 The other properties are expressed similarly and both \emph{subject-reduction}, 
 Theorem~\ref{thm-SR}, and \emph{progress}, Theorem~\ref{thm-progress}, are 
-still valid. The only change is the ``correct abstraction of the memory state'' criteria 
+still valid. The only change is the ``correct abstraction of the memory state'' criteria -- see Definition~\ref{CorrectAbstraction} --  
 that becomes $\forall x\in 
 \vars(S).\,\forall i\in\range(x).\, \sigma(\abs x)\leq\sigma(x[i])$ instead of $\forall 
 i\in\range(x)$ for arrays. The proofs are similar except in the case of $W~x$ 

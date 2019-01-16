@@ -19,15 +19,15 @@ On a related topic, I am not sure to see why VectorPU cannot enforce (at least p
 the absence of push/pull could be ensured by hidding the transfer functions in the API *,
 the read/write control is ensured by const-correctness, and pointer comparisons seems to be enough to ensure the restriction saying that a variable cannot appear twice in parameters.
 * of course that does not prevent one to break it willingly, but we want to protect from Murphy, not from Machiavelli.
---> say a word about this, but I believe const/cprrectness is wrong
+--> LUDO say a word about this, but I believe const/cprrectness is wrong
 
 The remaining case to control is the proposition:
 W x# \in M ==> w x occurs in all execution paths of S.
 And here, I am not sure to understand. Does that mean that each memory region accessible from the (write-only) input parameters must be written? That seems to be a strong constraint (even if, indeed most of the time, the targeted code just write buffers unconditionally, but maybe it should mentioned). If it is the reason why the well-defined property cannot be enforced, I think that it should be pointed out.
---> yes and no it is not the only reason
+--> LUDO yes and no it is not the only reason
 
 Q: p9 about the "waste device memory space". Do you know if in such a case, the device can somewhat virtualize the memory by only allocating the memory if a data-transfer is initiated? 
---> Christoph?
+--> Lu?
 
 On the symmetry between Push and Pull, intuitively I would write Pull x = rem(Push x). Maybe a footnote could confirm such an intuition (or say that I am wrong).
 --> right ADD
@@ -40,10 +40,11 @@ or this extension allow the presence of the memory location multiple times and t
 
 
 For readability:
-p6, first §: I suggest to put the last sentence "Table 1 summarizes ..." at the beginning of the paragraph
+XXp6, first §: I suggest to put the last sentence "Table 1 summarizes ..." at the beginning of the paragraph
 p7, § about partial vectors: I would suggest to either give an example now, or to simply removes this paragraph (and keep the details in the section about pvectors),
+---> Lu?  ADD AN EXAMPLE 
 p10+: In S, E x  suggests that Push/Pull/Noop are used with an associated variable, but it is not always consistent in the article (e.g. Example p14),
-p21: § before Theorem 3, in the sentence "The only change ..." a direct link to the "correct abstraction of the memory state" definition could ease the understanding,
+Xp21: § before Theorem 3, in the sentence "The only change ..." a direct link to the "correct abstraction of the memory state" definition could ease the understanding,
 p24: "W x# ; rem(R) y# cannot be valid" could be detailed.
 p24: last § of section 4.1 : maybe put the paragraph at the beginning of 4.2, avoiding the "Section 4.2 below".
 In references, I would suggest to remove URLs that are based on the DOI that is already provided.
@@ -83,7 +84,7 @@ Definition 3 range(x) is not defined.
 --? LUDO ok
 
 Theorem 3 is missing a proof.
---> proof sketch
+--> LUDO proof sketch
 
 Minor
 
@@ -102,7 +103,8 @@ XP. 28 The first sentence in the 1st paragraph from the bottom of the page “..
 The paper extends the works presented in the reference [5] by considering also the case of overlapping arrays in the theoretical framework that is proposed there.  Also, the impact of using this framework on the behavior of the VectorPU library  is analyzed in more details. The overlapping arrays are not yet supported by VectorPU, so this case is discussed only theoretical.
  
 These extensions should be also emphasized in the abstract of this paper which is now exactly the abstract of the paper presented at HPCS2018!
---> NO but perhaps we only added stuff and kept parts unchanged though -> rework the abstract and add smthing about the link with vectorpu
+--> NO but perhaps we only added stuff and kept parts unchanged though -> rework the abstract and add something about the link with vectorpu
+--> Lu/Christoph?
  
 The paper is well written, and the goal of formalizing the operations of memory accesses and memory synchronization between two memory spaces (CPU-GPU) is worth to be more investigated since it could help to prove that a program adequately annotated will always access valid memory spaces and tracks correctly which of the memory space contains the up-to-date data.
  

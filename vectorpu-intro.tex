@@ -174,7 +174,8 @@ not knowing when data is going to be accessed inside a component.
 % By overloading element
 % access and iterator operations, 
 
-The access mode specifiers,
+Table~\ref{tab:modes} summarizes the access mode annotations
+currently defined for VectorPU. The access mode specifiers,
 such as \texttt{R} (read on CPU), \texttt{W} (write on CPU), \texttt{RW} 
 (update, i.e., both read and write, on CPU), \texttt{GR} (read on GPU) and so forth,
 are available both as annotations of function signatures and
@@ -202,8 +203,7 @@ some of which (may) access the same element.
 A solution for this problem has been described for SkePU
 smart containers by Dastgeer~\cite{Dastgeer-IJPP15}. Section~\ref{sec:overlap-array} details a solution for handling overlapping arrays in vectorPU.
 %
-Table~\ref{tab:modes} summarizes the access mode annotations
-currently defined for VectorPU.
+
 
 \begin{table}
 \caption{\label{tab:modes}VectorPU access mode annotations for a parameter  \cite{VectorPU-2017}}
