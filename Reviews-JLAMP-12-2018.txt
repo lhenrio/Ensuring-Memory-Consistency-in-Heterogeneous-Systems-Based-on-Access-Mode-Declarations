@@ -30,7 +30,7 @@ Q: p9 about the "waste device memory space". Do you know if in such a case, the 
 --> Lu? --> this could be optimized, is this good?
 
 On the symmetry between Push and Pull, intuitively I would write Pull x = rem(Push x). Maybe a footnote could confirm such an intuition (or say that I am wrong).
---> LUDO: right ADD
+XX--> LUDO: right ADD
 
 About the fact that "In a set of access mode declaration, the same variable cannot appear twice", in the case of VectorPU, I would intuitively say that the "variable" is closer to the idea of memory location. Saying that basically, a memory location can only appear once (it would be the notion of "restrict"ed pointer in C). Provided that the extension of your formalism to overlapping vectors allows (and in fact even requires) to list all possibly impacted vectors in parameters, I think that something could be clarified:
 either if multiple pvectors talk about the same underlying vector, the access mode only appear once in the access mode declaration*,
@@ -40,14 +40,15 @@ or this extension allow the presence of the memory location multiple times and t
 
 
 For readability:
-XXp6, first §: I suggest to put the last sentence "Table 1 summarizes ..." at the beginning of the paragraph
 p7, § about partial vectors: I would suggest to either give an example now, or to simply removes this paragraph (and keep the details in the section about pvectors),
 ---> Lu?  ADD AN EXAMPLE 
-p10+: In S, E x  suggests that Push/Pull/Noop are used with an associated variable, but it is not always consistent in the article (e.g. Example p14),
+
+XXp10+: In S, E x  suggests that Push/Pull/Noop are used with an associated variable, but it is not always consistent in the article (e.g. Example p14),
+XXp6, first §: I suggest to put the last sentence "Table 1 summarizes ..." at the beginning of the paragraph
 Xp21: § before Theorem 3, in the sentence "The only change ..." a direct link to the "correct abstraction of the memory state" definition could ease the understanding,
-p24: "W x# ; rem(R) y# cannot be valid" could be detailed.
-p24: last § of section 4.1 : maybe put the paragraph at the beginning of 4.2, avoiding the "Section 4.2 below".
-In references, I would suggest to remove URLs that are based on the DOI that is already provided.
+Xp24: "W x# ; rem(R) y# cannot be valid" could be detailed.
+Xp24: last § of section 4.1 : maybe put the paragraph at the beginning of 4.2, avoiding the "Section 4.2 below".
+XIn references, I would suggest to remove URLs that are based on the DOI that is already provided.
 
 Typos:
 Xp5 : ... access mode specifiers.For (missing space),

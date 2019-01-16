@@ -254,11 +254,11 @@ effects on different memory locations. $x,y$ range over variables and we introdu
 variables. We use sequence and simple loops and conditionals. 
 Operations with effects 
 now apply to a variable;  the $\rem{E~x}$  is a remote operation 
- on the remote memory. For example, a GPU procedure 
-writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem{r~y}$. 
+ on the remote memory\footnote{Consequently, $\Pull$ could also be written: $\rem{\Push~x}$.}.  For example, a GPU procedure 
+writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem{r~y}$. We also have a $\noop$ operation that has no effect and can be considered as a neutral element for the sequence.
 Statements $S$ are defined as:
 
-{\small \[S::=E~x~|~\rem{E~x}~|~S;S'~|~\while(\cond) S ~|~ \IF{\cond}{S}{S'}\]}
+{\small \[S::=E~x~|~\rem{E~x}~|~S;S'~|~\while(\cond) S ~|~ \IF{\cond}{S}{S'}~|~\noop\]}
 \noindent{}where $E$ $x$ denotes some effect $E$ on variable $x$, $E\!\in\! \{r,\, w,\,  
 \Push,\, \Pull,\, \noop\}$.
 
@@ -407,12 +407,12 @@ only effect rules modify the store and no effect can reach $(I,I)$, except
 
 \noindent
    \emph{Example:} 
-    $w x;\rem{r~x}$ cannot be fully evaluated. Indeed, $(w x;\rem{r~x},(x\mapsto 
+    $w~ x;\rem{r~x}$ cannot be fully evaluated. Indeed, $(w x;\rem{r~x},(x\mapsto 
     (V,I)))\to (\rem{r~x},(x\mapsto (V,I)))$, but  $\rem{r~x}$ requires that $x$ is 
     mapped to $(X,V)$ for some $X$ which is not the case.
 However if we add a \Push\ operation to ensure the validity of the accessed memory the 
-program $w~x;Push;\rem{r~x}$ can be reduced as follows:\\
-$(w x;\rem{r~x},(x\mapsto (V,I)))\\~\qquad\to (\Push;\rem{r~x},(x\mapsto 
+program $w~x;\Push~x;\rem{r~x}$ can be reduced as follows:\\
+$(w x;\rem{r~x},(x\mapsto (V,I)))\\~\qquad\to (\Push~x;\rem{r~x},(x\mapsto 
 (V,I)))\\~\qquad\to 
 (\rem{r~x},(x\mapsto (V,V)))\to (\noop,(x\mapsto (V,V)))$
 
@@ -927,19 +927,19 @@ For every $y$ overlapping $x$, if $i$ is in the range in common between $x$ and 
 \end{quote}
 
 First note that no additional rule is necessary for read operations. Indeed, read operations use the validity status but do not modify it, consequently, read operations do not modify the validity status of other arrays and have no consequence on overlapping arrays.
-Note also that the above rule restricts a bit the expressible effects as, for example. $W\ \abs x ; \rem{R}\ \abs y$ cannot be valid if $x$ and $y$ overlap.
+Note also that the above rule restricts a bit the expressible effects as, for example, $W\ \abs x ; \rem{R}\ \abs y$ cannot be valid if $x$ and $y$ overlap. Indeed, $W\ \abs x$ means that all the cells of $x$ are written and thus the access mode for $\abs y$ must be $W$ or $RW$. In this case, this is indeed a safe restriction as the array $x$ will be written, and reading $y$ remotely might not access a valid value.
 
 
-\medskip
-
-Though very precise, this approach does not seem realistic and we additionally develop an inference mechanism for access mode declarations in presence of overlapping arrays.
-The objective  is to infer the correct annotations on  variables that are not passed as parameters. Knowing the access modes for the function parameters, we infer what operation must be done on other intersecting arrays to ensure the coherency of the system, and we express these additional operations as implicit generated annotations. These additional access mode declarations are inferred, the semantics of these added declarations will result in additional data transfers and validation/invalidation operations that make the program correct. This is less precise as it takes a pessimistic approach on the operations performed by the declared arrays. For example, for any array that is declared $RW$ we will suppose that all the array elements may be read and written, but the approach is safe and mostly automatic. This is presented in Section~\ref{sec:infer-overlap} below.
 %
 %Another way to see the next two subsection is that the first one extends the well-declared definition for overlapping arrays, and the second one defines an inference mechanism that ensures that a function is well-declared in presence of overlapping arrays, provided the declaration is correct not taking overlapping arrays into consideration, i.e. in the sense of Definition~\ref{def:well-declared-array}.
 
 
 
 \subsection{Access mode inference for overlapping arrays}\label{sec:infer-overlap}
+
+Though very precise, the approach described above does not seem realistic and we additionally develop an inference mechanism for access mode declarations in presence of overlapping arrays.
+The objective  is to infer the correct annotations on  variables that are not passed as parameters. Knowing the access modes for the function parameters, we infer what operation must be done on other intersecting arrays to ensure the coherency of the system, and we express these additional operations as implicit generated annotations. These additional access mode declarations are inferred, the semantics of these added declarations will result in additional data transfers and validation/invalidation operations that make the program correct. This is less precise as it takes a pessimistic approach on the operations performed by the declared arrays. For example, for any array that is declared $RW$ we will suppose that all the array elements may be read and written, but the approach is safe and mostly automatic.
+
 Starting from a given set of access mode annotations, we want to infer other access modes that are consequences of the overlaps and the existing annotations.
 Because we are only aware of an approximation of the effects (for each array variable, effect is abstracted by a single global effect), the inferred accesses will be approximate but can be a safe over-approximation of the effect of the function.
  Without knowing the real accesses performed by the function, we deduce from the declared access modes, a set of additional ``artificial accesses''.
