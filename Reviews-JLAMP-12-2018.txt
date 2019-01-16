@@ -49,12 +49,12 @@ p24: last § of section 4.1 : maybe put the paragraph at the beginning of 4.2, a
 In references, I would suggest to remove URLs that are based on the DOI that is already provided.
 
 Typos:
-p5 : ... access mode specifiers.For (missing space),
-p5 : ... to an Thrust compatible (a)
-p6 : vectoruPU
-p8 : Fig 2 : indentation of if-blocks
-p10 : Z, T are not used here, so maybe it is not necessary to talk about them (you re-introduce these names latter when needed),
-p11 : where E x (a space appears at the beginning)
+Xp5 : ... access mode specifiers.For (missing space),
+Xp5 : ... to an Thrust compatible (a)
+Xp6 : vectoruPU
+Xp8 : Fig 2 : indentation of if-blocks
+Xp10 : Z, T are not used here, so maybe it is not necessary to talk about them (you re-introduce these names latter when needed),
+Xp11 : where E x (a space appears at the beginning)
 p30 : explcitly
 
 -Reviewer 2

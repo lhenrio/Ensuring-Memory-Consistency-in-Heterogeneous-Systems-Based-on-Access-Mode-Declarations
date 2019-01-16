@@ -163,7 +163,7 @@ Components and the types of execution units that
 access their operands are declared 
 by annotating the operands of the function, either at a call of the function
 or for the formal parameters in the function's declaration, 
-with VectorPU \emph{access mode specifiers}.For example, in contrast,  SkePU \cite{Enmyren10}  overloads element
+with VectorPU \emph{access mode specifiers}. For example, in contrast,  SkePU \cite{Enmyren10}  overloads element
 access and iterator operations so that monitored 
 accesses are also possible on demand in non-componentized (i.e., 
 ordinary C++) CPU code.
@@ -185,7 +185,7 @@ For instance, \texttt{GW(x)} expands to a GPU pointer to
 the GPU device copy of \texttt{x},
 which might be dereferenced for GPU writing accesses to \texttt{x},
 such as the GPU code: \verb:*( GW(x) + 2 ) = 3.14:.
-\texttt{GWI(x)} evaluates to an Thrust-compatible iterator onto the 
+\texttt{GWI(x)} evaluates to a Thrust-compatible iterator onto the 
 GPU device copy of \texttt{x}, and \texttt{WEI(x)} to an iterator-end reference
 to the last element of \texttt{x} on CPU side. The current VectorPU prototype implementation does not
 (yet) type-check access-mode annotations in signatures of externally defined functions.
@@ -200,7 +200,7 @@ VectorPU implementation does not (yet) support coherence for
 intervals of elements resulting from multiple (partial) accesses
 some of which (may) access the same element.
 A solution for this problem has been described for SkePU
-smart containers by Dastgeer~\cite{Dastgeer-IJPP15}. Section~\ref{sec:overlap-array} details a solution for handling overlapping arrays in vectoruPU.
+smart containers by Dastgeer~\cite{Dastgeer-IJPP15}. Section~\ref{sec:overlap-array} details a solution for handling overlapping arrays in vectorPU.
 %
 Table~\ref{tab:modes} summarizes the access mode annotations
 currently defined for VectorPU.
@@ -299,13 +299,14 @@ overlapping) \texttt{pvector} objects as seemingly different \texttt{vector}
 arguments that however are just windows onto
 a common \texttt{vector} container variable. 
 
-\begin{figure}
+\begin{figure}[tb]
+\begin{minipage}{.48\textwidth}
 \begin{small}
 \begin{verbatim}
 void coherent_on_cpu_r(){
   	 if( !cpu_coherent_unit ){
-  		 download();
-  		 cpu_coherent_unit=true;
+       download();
+       cpu_coherent_unit=true;
   	 }
 }
 void coherent_on_cpu_w(){
@@ -314,15 +315,21 @@ void coherent_on_cpu_w(){
 }
 void coherent_on_cpu_rw(){
   	 if( !cpu_coherent_unit ){
-  		 download();
-  		 cpu_coherent_unit=true;
+       download();
+       cpu_coherent_unit=true;
   	 }
   	 gpu_coherent_unit=false;
 }
+\end{verbatim}
+\end{small}
+\end{minipage}\qquad~
+\begin{minipage}{.48\textwidth}
+\begin{small}
+\begin{verbatim}
 void coherent_on_gpu_r(){
   	 if( !gpu_coherent_unit ){
-  		 upload();
-  		 gpu_coherent_unit=true;
+       upload();
+       gpu_coherent_unit=true;
 	 }
 }
 void coherent_on_gpu_w(){
@@ -331,13 +338,14 @@ void coherent_on_gpu_w(){
 }
 void coherent_on_gpu_rw(){
   	 if( !gpu_coherent_unit ){
-  		 upload();
-  		 gpu_coherent_unit=true;
+       upload();
+       gpu_coherent_unit=true;
   	 }
   	 cpu_coherent_unit=false;
 }
 \end{verbatim}
 \end{small}
+\end{minipage}
 \caption{\label{fig:vectorpucoherence}Coherence control code,
     here for simple vectors,
     in \texttt{vectorpu.h}. Functions \texttt{download} and

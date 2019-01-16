@@ -217,7 +217,7 @@ Each operation has a signature in the sense that it may require a certain memory
 and 
 will produce another memory status. The signature of each operation is expressed below.
 We use
-variables $X$, $Y$, $Z$, $T$ that are considered as universally quantified in each rule. 
+variables --$X$, $Y$-- that are considered universally quantified in each rule. 
 They can 
 be instantiated with either $V$ or $I$.
 \begin{mathpar}
@@ -259,8 +259,8 @@ writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem
 Statements $S$ are defined as:
 
 {\small \[S::=E~x~|~\rem{E~x}~|~S;S'~|~\while(\cond) S ~|~ \IF{\cond}{S}{S'}\]}
-\noindent where $E$ $x$ denotes some effect $E$ on variable $x$, with $E\in \{r,$ $w,$  
-$\Push,$ $\Pull,$ $\noop\}$.
+\noindent{}where $E$ $x$ denotes some effect $E$ on variable $x$, $E\!\in\! \{r,\, w,\,  
+\Push,\, \Pull,\, \noop\}$.
 
 We are  interested  in conditionals dealing 
 with the validity status of the variables. Other conditionals  are expressed as a generic 
@@ -1215,7 +1215,7 @@ cache coherence protocol, the VI-protocol.
  number of readers has to be tracked for example. 
  Also, SkePU uses a more space-efficient management of
  partial vector accesses, the
- coherence protocol itself involves explcitly intersection tests with
+ coherence protocol itself involves explicit intersection tests with
  existing copies. 
  Verifying such framework would require 
  a modification of our abstract state representation and a modification of the access 
