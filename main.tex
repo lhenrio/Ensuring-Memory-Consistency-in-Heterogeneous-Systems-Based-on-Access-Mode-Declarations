@@ -337,7 +337,7 @@ use validity variables $X$, $Y$, $Z$, $T$
 that are universally quantified in each rule.
  The first %three
  four rules present the 
-evaluation of conditional statements, we suppose additional rules exist for evaluating 
+evaluation of conditional statements, we assume additional rules exist for evaluating 
 $\oplus$\footnote{We are only interested in cache consistency properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect on a variable $x$ updating the validity store, 
 and the \textsc{Remote Effect} rule applies an effect occurring on the distant memory, it 
 applies the symmetric of the effect to the variable. Note that \Push\ is the symmetric of 
@@ -402,7 +402,7 @@ It is impossible to reach an unsafe state from the initial state.
 \begin{proof}[Proof sketch] 
 Unsafe states are avoided  because of the effects of operations: 
 only effect rules modify the store and no effect can reach $(I,I)$, except 
-\noop\ starting from $(I,I)$, whic is sufficient to conclude as the inital state is not $(I,I)$.
+\noop\ starting from $(I,I)$, which is sufficient to conclude as the inital state is not $(I,I)$.
 \end{proof}
 
 \noindent
@@ -565,11 +565,11 @@ formally on the correctness of the validity tracking performed by VectorPU.
 \begin{mathpar}
 \transl{R~\abs x}=(\IF{\isvalid~\abs x}{\noop}{(\Pull~x;\Pull~\abs x)})
 
-\transl{\rem {R~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)})
+\transl{\rem {R~\abs x}}=(\IF{\isremvalid~\abs x}{\noop}{(\Push~x;\Push~\abs x)})
 
-\transl{RW~\abs x}=(\IF{\isvalid~x}{\noop}{(\Pull~x;\Pull~\abs x)});w~\abs x
+\transl{RW~\abs x}=(\IF{\isvalid~\abs x}{\noop}{(\Pull~x;\Pull~\abs x)});w~\abs x
 
-\transl{\rem{RW~\abs x}}=(\IF{\isremvalid~x}{\noop}{(\Push~x;\Push~\abs x)});\rem{w~\abs 
+\transl{\rem{RW~\abs x}}=(\IF{\isremvalid~\abs x}{\noop}{(\Push~x;\Push~\abs x)});\rem{w~\abs 
 x}
 
 \transl{W~\abs x}= w~\abs x
@@ -613,6 +613,7 @@ the same way as our effect system  does in the translation rules. These translat
 rules  perform \Push\ or 
 \Pull\ operations in order to ensure that the memory is in a correct validity status for 
 the read or write operation to be performed.
+The validity conditions are checked on the abstract value, which corresponds to the fact that VectorPU only check the status of the coherency flag stored with the vector structure; push/pull operations are performed twice: once for representing the data-transfer, and once for representing the validity status update. Finally, status is updated when writing operations are declared.
 When evaluating a program we create a store where the validity status of real and 
 abstract variables are $(V,I)$, corresponding to the fact that data is 
 initially placed in one memory location; typically, in VectorPU, in the CPU memory space.
@@ -1140,14 +1141,14 @@ that each component accesses a valid memory space.
 
 More recently, and adopting a more language oriented approach, Crary and 
 Sullivan~\cite{Crary:POPL:2015} designed 
-a calculus for expressing ordering of memory accesses in weak memory models, however we 
-are interested here in a much simpler problem where memory access is  sequential 
-and clearly identified. 
+a calculus for expressing ordering of memory accesses in weak memory models. In this paper, we 
+are interested in a much simpler problem where memory access is  sequential 
+and clearly identified but the objective is to prove the correctness of simple cache-coherency operations. 
 Even an  extension of this work for parallel processes would  result in a 
 simpler model than the ones that exist for weak memory models because of the explicit 
 consistency points introduced in the execution by the start/end of each function. 
 
-The closest work to ours is probably~\cite{BJPTSAC16} that defines a memory access calculus similar to ours and prove the 
+The closest work to ours is probably~\cite{BJPTSAC16} that defines a memory access calculus similar to ours and proves the 
 correctness of a generic cache coherence protocol expressed as part of the semantics of 
 the calculus. Compared to this work, we are interested in explicit statements on memory 
 accesses and thus the cache consistency is partially ensured  by the programmer 

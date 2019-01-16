@@ -55,7 +55,7 @@ Xp6 : vectoruPU
 Xp8 : Fig 2 : indentation of if-blocks
 Xp10 : Z, T are not used here, so maybe it is not necessary to talk about them (you re-introduce these names latter when needed),
 Xp11 : where E x (a space appears at the beginning)
-p30 : explcitly
+Xp30 : explcitly
 
 -Reviewer 2
 
@@ -87,11 +87,12 @@ Theorem 3 is missing a proof.
 
 Minor
 
-P.11, last paragraph : “..., we suppose additional rules ...“ -> “..., we assume additional rules ..”
-P.14, in Proof sketch “, whic” -> “, which”
-Figure 4, in the first formulae, shouldn’t isValid be performed on x (as on the rest of the formula) instead of x#
-P. 28 The first sentence in the 2nd paragraph from the bottom of the page “Most recently ..” needs to be rewritten.
-P. 28 The first sentence in the 1st paragraph from the bottom of the page “... prove … “ -> “ … proves …”
+XP.11, last paragraph : “..., we suppose additional rules ...“ -> “..., we assume additional rules ..”
+XP.14, in Proof sketch “, whic” -> “, which”
+XFigure 4, in the first formulae, shouldn’t isValid be performed on x (as on the rest of the formula) instead of x#
+OOPS: no the contrary; added comment
+XXP. 28 The first sentence in the 2nd paragraph from the bottom of the page “Most recently ..” needs to be rewritten.
+XP. 28 The first sentence in the 1st paragraph from the bottom of the page “... prove … “ -> “ … proves …”
 
 
 -Reviewer 3
