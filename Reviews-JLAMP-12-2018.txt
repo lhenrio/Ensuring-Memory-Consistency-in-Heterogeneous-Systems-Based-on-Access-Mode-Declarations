@@ -13,7 +13,7 @@ The paper is well explained and the approach quite intuitive. The proofs and ske
 I still have some minor remarks.
 
 In VectorPU, the annotations are based on macros. I had a look to the implementation. While the expansion of the macros is straightforward for function calls, this is not the case for function parameters. Maybe it could be useful to have an example of expanded macro (even if some elements are simplified), just to catch the idea that each macro creates behind the scene a pointer to a particular memory regions with the corresponding access, etc.
----> Christoph
+---> Lu+Christoph: add an example --> Figure
 
 On a related topic, I am not sure to see why VectorPU cannot enforce (at least partially), the "well-declared program" definition. Basically:
 the absence of push/pull could be ensured by hidding the transfer functions in the API *,
@@ -27,16 +27,16 @@ And here, I am not sure to understand. Does that mean that each memory region ac
 --> LUDO yes and no it is not the only reason
 
 Q: p9 about the "waste device memory space". Do you know if in such a case, the device can somewhat virtualize the memory by only allocating the memory if a data-transfer is initiated? 
---> Lu?
+--> Lu? --> this could be optimized, is this good?
 
 On the symmetry between Push and Pull, intuitively I would write Pull x = rem(Push x). Maybe a footnote could confirm such an intuition (or say that I am wrong).
---> right ADD
+--> LUDO: right ADD
 
 About the fact that "In a set of access mode declaration, the same variable cannot appear twice", in the case of VectorPU, I would intuitively say that the "variable" is closer to the idea of memory location. Saying that basically, a memory location can only appear once (it would be the notion of "restrict"ed pointer in C). Provided that the extension of your formalism to overlapping vectors allows (and in fact even requires) to list all possibly impacted vectors in parameters, I think that something could be clarified:
 either if multiple pvectors talk about the same underlying vector, the access mode only appear once in the access mode declaration*,
 or this extension allow the presence of the memory location multiple times and the new approach is more general (even if it relies on over-approximation).
 *and that means that the macros of VectorPU and the ones in the formalism do not really have the same meaning anymore.
---> clarify that this is the formalisation and clarify that you can have the same vars as soon as you have the same access declaration
+--> LUDO: clarify that this is the formalisation and clarify that you can have the same vars as soon as you have the same access declaration
 
 
 For readability:
@@ -76,6 +76,7 @@ Operational semantic for remote effect should be highlighted for the reader poin
 --> LUDO: in text but I thought it was there: insist
 
 Extended proofs should be presented (it is a journal paper with generous page limits).
+--> wait frederic answer
 
 Concept of unification between two abstract states is not defined before it is used in Property 1.
 --> LUDO: explain informally
@@ -104,7 +105,7 @@ The paper extends the works presented in the reference [5] by considering also t
  
 These extensions should be also emphasized in the abstract of this paper which is now exactly the abstract of the paper presented at HPCS2018!
 --> NO but perhaps we only added stuff and kept parts unchanged though -> rework the abstract and add something about the link with vectorpu
---> Lu/Christoph?
+--> Christoph
  
 The paper is well written, and the goal of formalizing the operations of memory accesses and memory synchronization between two memory spaces (CPU-GPU) is worth to be more investigated since it could help to prove that a program adequately annotated will always access valid memory spaces and tracks correctly which of the memory space contains the up-to-date data.
  
