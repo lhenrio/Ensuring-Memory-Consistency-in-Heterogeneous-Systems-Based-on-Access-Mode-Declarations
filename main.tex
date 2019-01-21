@@ -137,15 +137,16 @@ Declarations in a Model for Memory Consistency in Heterogeneous Systems }
 \address[liu]{University of Linköping, Sweden}
 
 \begin{abstract}
-Running a program on disjoint memory spaces requires to address memory consistency 
-issues and to perform  transfers so that the program always accesses  the right 
-data. Several approaches exist to ensure the consistency of the memory accessed,  we 
-are interested here in the verification of a declarative approach where each component of 
+On a system that exposes disjoint memory spaces to the software, a program has to address memory consistency 
+issues and perform data transfers so that it always accesses valid  
+data. Several approaches exist to ensure the consistency of the memory accessed. Here we 
+are interested in the verification of a declarative approach where each component of 
 a computation is annotated with an access mode declaring which part of the memory is 
 read or written by the component. The programming framework uses the component
-annotations to guarantee the validity of the memory accesses. This is the mechanism used in VectorPU, a C++ library for programming CPU-GPU heterogeneous  systems 
-and this article proves the correctness of the software cache-coherence mechanism used in 
-the library.  The formalism we propose also takes into account arrays for which a single validity status is stored for the whole array; additional mechanisms for dealing with overlapping arrays are also studied. Beyond the scope of VectorPU, this article can be considered as a simple and effective formalisation of memory consistency mechanisms based on the explicit declaration of the effect of each component on each memory space.
+annotations to guarantee the validity of the memory accesses. This is the mechanism used in VectorPU, a C++ library for programming CPU-GPU heterogeneous  systems. 
+This article proves the correctness of the software cache-coherence mechanism used in VectorPU. 
+Beyond the scope of VectorPU, this article provides a simple and effective formalisation of memory consistency mechanisms based on the explicit declaration of the effect of each component on each memory space. 
+The formalism we propose also takes into account arrays for which a single validity status is stored for the whole array; additional mechanisms for dealing with overlapping arrays are also studied. 
 
 \end{abstract}
 
@@ -1225,6 +1226,12 @@ cache coherence protocol, the VI-protocol.
  Verifying such framework would require 
  a modification of our abstract state representation and a modification of the access 
  mode translational semantics.
+ 
+\section*{Acknowledgments}   % NEW
+
+C.\ Kessler acknowledges partial funding by
+EU H2020 project EXA2PRO (801015).
+
 %% If you have bibdatabase file and want bibtex to generate the
 %% bibitems, please use
 %%
