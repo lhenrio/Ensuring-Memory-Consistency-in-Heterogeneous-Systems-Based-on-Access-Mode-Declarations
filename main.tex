@@ -78,7 +78,7 @@
 \newcommand{\AM}{\mathcal{M}}
 \newcommand{\Prog}{\mathcal{P}}
 \usepackage{etoolbox}
-\DeclareMathOperator{\range}{range}
+\DeclareMathOperator{\range}{index}
 \DeclareMathOperator{\dom}{dom}
 \newcommand{\Overlap}[1]{O(#1)}
 
@@ -199,7 +199,7 @@ contrary. \noop\ is an operation that does nothing.
  \[E::= \Push ~|~ \Pull ~|~ r~|~ w ~|~ %rw ~|~ 
 \noop\]
 
-The effect of these operations express their requirements and effects on a single memory 
+These operations express  requirements and changes on a single memory 
 location. We 
 express 
 below the semantics of each of the operations on the consistency status of the concerned 
@@ -216,7 +216,7 @@ transferred before being usable there.
 
 Each operation has a signature in the sense that it may require a certain memory status 
 and 
-will produce another memory status. The signature of each operation is expressed below.
+will produce another memory status. The signature of each operation is expressed below and is called its \emph{effect}.
 We use
 variables --$X$, $Y$-- that are considered universally quantified in each rule. 
 They can 
@@ -243,6 +243,8 @@ invalidates the remote memory.  \Push\ uploads the local memory and thus makes v
 distant memory; 
 it requires that the data is locally valid, and \Pull\ is the symmetrical operation.
 
+Applying these signature consists in trying to \emph{unify} the current memory status with the effect of the variable by instantiating $X$ and $Y$ appropriately. For example an operation $r$ can be applied on a validity status $(V,V)$, leading to the validity status $(V,V)$ because $(V,V)$ can be unified with $(V,X)$ by instantiating $X=V$. However $r$ can not be applied on a validity status $(I,V)$ because $(V,X)$ cannot be unified with $(I,V)$: $I$ and $V$ cannot be unified.
+
 An additional operation could be defined: 
  an 
 $rw$ operation would represent a read and/or write access, it would both require data 
@@ -260,7 +262,7 @@ writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem
 Statements $S$ are defined as:
 
 {\small \[S::=E~x~|~\rem{E~x}~|~S;S'~|~\while(\cond) S ~|~ \IF{\cond}{S}{S'}~|~\noop\]}
-\noindent{}where $E$ $x$ denotes some effect $E$ on variable $x$, $E\!\in\! \{r,\, w,\,  
+\noindent{}where $E$ $x$ denotes some operation $E$ on variable $x$, $E\!\in\! \{r,\, w,\,  
 \Push,\, \Pull,\, \noop\}$.
 
 We are  interested  in conditionals dealing 
@@ -284,7 +286,8 @@ sequence nor \noop. $\sigma[x\mapsto (X,Y)]$ is the update operation on maps.
 %pairs is extended to store (it swaps the value associated to each variable)
 
 
-\begin{figure*}[tp]
+\begin{figure*}[t]
+\begin{small}
 \begin{mathpar}
 \inferrule[valid]
 {\sigma(x)=(V,X)}
@@ -313,23 +316,21 @@ sequence nor \noop. $\sigma[x\mapsto (X,Y)]$ is the update operation on maps.
 
 \inferrule[While-True]
 {\feval{\cond}{\sigma} }
-{(\while(\cond) S;S',\sigma)\to (S;\while(\cond) S;S',\sigma)}
-
+{(\while(\!\cond) S;S',\sigma)\!\to\! (S;\while(\!\cond) S;S',\sigma)}
+\qquad
 \inferrule[While-False]
 {\neg\feval{\cond}{\sigma} }
-{(\while(\cond) S;S',\sigma)\to (S',\sigma)}
-
-\\
+{(\while(\!\cond) S;S',\sigma)\!\to\! (S',\sigma)}
 
 \inferrule[IF-True]
 {\feval{\cond}{\sigma} }
-{((\IF\cond S S');S'',\sigma)\to (S;S'',\sigma)}
-
+{((\IF{\!\cond} S S');S'',\sigma)\!\to\! (S;S'',\sigma)}
+\quad~
 \inferrule[IF-False]
 {\neg\feval{\cond}{\sigma} }
-{((\IF\cond S S');S'',\sigma)\to (S';S'',\sigma)}
-
+{((\IF{\!\cond} S S');S'',\sigma)\!\to\! (S';S'',\sigma)}
     \end{mathpar}
+\end{small}
 \caption{Operational semantics of validity status.}\label{fig:Opsem}
 \end{figure*}
 
@@ -339,9 +340,9 @@ that are universally quantified in each rule.
  The first %three
  four rules present the 
 evaluation of conditional statements, we assume additional rules exist for evaluating 
-$\oplus$\footnote{We are only interested in cache consistency properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect on a variable $x$ updating the validity store, 
-and the \textsc{Remote Effect} rule applies an effect occurring on the distant memory, it 
-applies the symmetric of the effect to the variable. Note that \Push\ is the symmetric of 
+$\oplus$\footnote{We are only interested in cache consistency properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect of the operation $E$ on a variable $x$ updating the validity store, 
+and the \textsc{Remote Effect} rule applies an operation occurring on the distant memory, it 
+applies the symmetric of the effect of the operation to the variable: \emph{validity values are switched compared to the non-remote effect}. Note that \Push\ is the symmetric of 
 \Pull\ and we could have removed one of those two operations without loss of generality. 
 The last rules are standard ones for \symb{if} and \symb{while} statements.
 
@@ -495,6 +496,11 @@ validity status of the array is abstracted away by a single validity status pair
 a dynamic abstraction of the consistency status of the memory can be used.
 %can be used except that the abstract view is computed dynamically but must stay 
 %consistent with the validity status of the real memory.
+Abstract variables are not part of the applicative code but can be used in the access mode declarations. 
+
+Consider for example an array $x$. As it is not desirable to store the information of the validity status of all the elements of the array, we will create for this array and abstract variable $\abs x$ that will represent all the elements of the array -- $x[i]$ -- from the validity status point of view. If the representation was precise, a value $(V,I)$ for $\abs x$ would mean that all the elements of the array are valid locally and invalid remotely. In practice we need to authorize some approximation of the validity status, at least because most operations only act on some of the elements of the array. Consequently, some loss of information: if $\sigma(\abs x)=(V,I)$ then each element of the array $x$ must be locally valid, the remote elements may be valid or invalid. like with non-abstract variables, having $\sigma(\abs x)=(I,I)$ is  not desirable as the coherence protocol would be unable to know where are the valid elements of the array (even if for all $i$, $x[i]=(V,I)$ or $x[i]=(I,V)$). In the case of arrays and most of the usual data-structures, the mapping between abstract and concrete elements is quite trivial. From a theoretical point of view,  it is possible to define an abstraction on  such that for example $\abs x=\abs y$ but then the definition of the mapping would be very difficult to use.
+
+
 More technically, the abstraction and declaration layer relies on two principles:
 \begin{itemize}
 \item Each variable $x$ has an abstract variable $\abs x$ that represents it. In this 
@@ -518,7 +524,7 @@ We now define access mode declarations:\\[-3.3ex]
 These access modes declare the kind of access (read $R$, write $W$, or read and/or write 
 $RW$) that 
 can be performed on the variable $x$ represented by $\abs x$. In a set 
-of access mode declarations the same variable cannot appear twice. There exist declared 
+of access mode declarations the same variable cannot appear twice\footnote{This restriction simplifies the formal definition and the reasoning. Extending the results to the same variable appearing twice with the same access mode is trivial (e.g. to take into account the same parameter passed twice to the same function). Having the same variable declared twice with different access modes is not safe in the general case. Section~\ref{sec:overlap-array} will study more precisely the case of overlapping arrays, which somehow generalizes aliasing.}. There exist declared 
 access modes for  local accesses and for  the 
 remote memory space.
 
@@ -570,7 +576,7 @@ formally on the correctness of the validity tracking performed by VectorPU.
 
 \transl{RW~\abs x}=(\IF{\isvalid~\abs x}{\noop}{(\Pull~x;\Pull~\abs x)});w~\abs x
 
-\transl{\rem{RW~\abs x}}=(\IF{\isremvalid~\abs x}{\noop}{(\Push~x;\Push~\abs x)});\rem{w~\abs 
+\transl{\rem{RW\,\abs x}}\!=\!(\IF{\isremvalid~\abs x}{\noop}{({\!\Push~x};\Push~\abs x)});\rem{w~\abs 
 x}
 
 \transl{W~\abs x}= w~\abs x
@@ -850,7 +856,7 @@ variable.
 
 \begin{definition}[Well-declared program with array access]\label{def:well-declared-array}
 A program $\Prog$ is \emph{well-declared} if for all $\AM\{S\}$ in $\Prog$, additionally 
-to the rules of Definition~\ref{def-WD}, we have:
+to the rules of Definition~\ref{def-WD}, we have\footnote{$\range(x)$ returns the set of valid indices of the array $x$}:
 \begin{itemize}
 \item $w\ x[i]\in S \implies (W\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,
 \item $r\ x[i]\in S \implies (R\ \abs x \in \AM \lor RW\ \abs x \in \AM)$,

@@ -36,7 +36,7 @@ About the fact that "In a set of access mode declaration, the same variable cann
 either if multiple pvectors talk about the same underlying vector, the access mode only appear once in the access mode declaration*,
 or this extension allow the presence of the memory location multiple times and the new approach is more general (even if it relies on over-approximation).
 *and that means that the macros of VectorPU and the ones in the formalism do not really have the same meaning anymore.
---> LUDO: clarify that this is the formalisation and clarify that you can have the same vars as soon as you have the same access declaration
+XX--> LUDO: clarify that this is the formalisation and clarify that you can have the same vars as soon as you have the same access declaration
 
 
 For readability:
@@ -67,23 +67,23 @@ The paper presents an approach for verifying VectorPU, a cache coherence protoco
 
 Review
 The authors address an important problem of verifying a cache coherence protocol and provide proper motivation and the background for their work. The formalism presented in Sections 3.1 and 3.2 is well written (except for minor comments as outlined below), adequately defined and properly explained. However, starting with Section 3.3  it seems that the quality of the presentation decreased. First of all, the motivation for introducing abstract variables should be explained on a concrete example, i.e., the array as the paper presents later on p16. Also the notion of abstract variables should be better defined. Otherwise it is not clear (until later) that one abstract variable can represent several concrete ones. It was not clear how abstract variables are introduced. Is it in the code? How the mapping between abstract and concrete variables is created? The rest of the paper that talks about arrays and the extension to the overlapping array are adequately presented. Perhaps the authors could in their next revision improve the introduction of abstract variables.
---> Ludo: explain better abstract variables --> arrays
+XX--> Ludo: explain better abstract variables --> arrays
 
 Here are some specific points:
 Section 3.2 should be more consistent. After the grammar it says E x denotes some effect E on variable x, while before E was defined as an operation. The definition of E (on the previous page) should be labeled and referenced here.
---> LUDO unify (I thought we already unified)
+XX--> LUDO unify (I thought we already unified)
 
 Operational semantic for remote effect should be highlighted for the reader pointing out the fact that the validity values are switched.
---> LUDO: in text but I thought it was there: insist
+XX--> LUDO: in text but I thought it was there: insist
 
 Extended proofs should be presented (it is a journal paper with generous page limits).
 --> wait frederic answer
 
-Concept of unification between two abstract states is not defined before it is used in Property 1.
+XXConcept of unification between two abstract states is not defined before it is used in Property 1.
 --> LUDO: explain informally
 
 Definition 3 range(x) is not defined.
---? LUDO ok
+XX--? LUDO ok
 
 Theorem 3 is missing a proof.
 --> LUDO proof sketch
