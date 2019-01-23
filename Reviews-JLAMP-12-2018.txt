@@ -19,12 +19,12 @@ On a related topic, I am not sure to see why VectorPU cannot enforce (at least p
 the absence of push/pull could be ensured by hidding the transfer functions in the API *,
 the read/write control is ensured by const-correctness, and pointer comparisons seems to be enough to ensure the restriction saying that a variable cannot appear twice in parameters.
 * of course that does not prevent one to break it willingly, but we want to protect from Murphy, not from Machiavelli.
---> LUDO say a word about this, but I believe const/cprrectness is wrong
+XX--> LUDO say a word about this, but I believe const/cprrectness is wrong
 
 The remaining case to control is the proposition:
 W x# \in M ==> w x occurs in all execution paths of S.
 And here, I am not sure to understand. Does that mean that each memory region accessible from the (write-only) input parameters must be written? That seems to be a strong constraint (even if, indeed most of the time, the targeted code just write buffers unconditionally, but maybe it should mentioned). If it is the reason why the well-defined property cannot be enforced, I think that it should be pointed out.
---> LUDO yes and no it is not the only reason
+XX--> LUDO yes and no it is not the only reason
 
 Q: p9 about the "waste device memory space". Do you know if in such a case, the device can somewhat virtualize the memory by only allocating the memory if a data-transfer is initiated? 
 --> Lu? --> this could be optimized, is this good?
