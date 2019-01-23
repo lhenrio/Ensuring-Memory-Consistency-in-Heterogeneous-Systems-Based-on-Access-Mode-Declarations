@@ -105,8 +105,8 @@ XP. 28 The first sentence in the 1st paragraph from the bottom of the page “..
 The paper extends the works presented in the reference [5] by considering also the case of overlapping arrays in the theoretical framework that is proposed there.  Also, the impact of using this framework on the behavior of the VectorPU library  is analyzed in more details. The overlapping arrays are not yet supported by VectorPU, so this case is discussed only theoretical.
  
 These extensions should be also emphasized in the abstract of this paper which is now exactly the abstract of the paper presented at HPCS2018!
---> NO but perhaps we only added stuff and kept parts unchanged though -> rework the abstract and add something about the link with vectorpu
---> Christoph
+XX--> NO but perhaps we only added stuff and kept parts unchanged though -> rework the abstract and add something about the link with vectorpu
+XX--> Christoph
  
 The paper is well written, and the goal of formalizing the operations of memory accesses and memory synchronization between two memory spaces (CPU-GPU) is worth to be more investigated since it could help to prove that a program adequately annotated will always access valid memory spaces and tracks correctly which of the memory space contains the up-to-date data.
  
