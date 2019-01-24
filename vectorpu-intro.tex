@@ -44,7 +44,7 @@ transparently perform data transfer and memory allocation optimizations
 \cite{Dastgeer-IJPP15}) 
 are provided in a number of programming frameworks 
 for heterogeneous systems, such as
-StarPU \cite{StarPU} and SkePU \cite{Enmyren10,Dastgeer-IJPP15}. StarPU is a 
+StarPU \cite{StarPU} and SkePU~\cite{Enmyren10,Dastgeer-IJPP15}. StarPU is a 
 C-based library that provides API functions to
 define multi-variant tasks for dynamic scheduling
 where the data containers are used for modeling 
@@ -79,22 +79,23 @@ leads however to some compromises concerning the possibility to perform static a
 In particular, VectorPU has no explicit type system for the
 access modes, as these are not known to the C++ compiler.
 
-In this paper, we investigate how to formalize access modes
+In this paper, we  formalize access modes
 and data transfers in CPU-GPU heterogeneous systems and prove 
 the correctness of the software
 cache coherence mechanism used in VectorPU.
 The contributions of this paper are:
 
 \begin{itemize}
-\item We introduce a simple effect system modeling the semantics of memory
+\item A simple effect system modeling the semantics of memory
    accesses and communication in a CPU-GPU heterogeneous system,
-   and define a small calculus expressing different memory
+\item A small calculus expressing different memory
    accesses and their composition across program traces. 
-\item We express VectorPU operations as higher-level statements
+\item The interpretation of VectorPU operations as higher-level statements
     that can be translated into the core calculus,
-    and show that, if all memory accesses are performed 
+\item A proof that if all memory accesses are performed 
     through VectorPU operations, the memory cannot reach an 
-    inconsistent state and all memory accesses succeed.
+    inconsistent state and all memory accesses succeed,
+\item The abstraction necessary to take into account arrays, possibly overlapping, in the formalism.
 \end{itemize}
 
 This article is an extended version of \cite{HKL-4PAD2018}, with two main additions. First the relationship between the formal results and the VectorPU implementation is  detailed, illustrating the impact of the proven results on the behaviour of the library. Second, the theoretical framework is extended to take into account the fact that manipulated arrays may overlap and that the consistency mechanism must take this information into account to be correct. While overlapping arrays are not yet supported by VectorPU, based on the formal model we develop, we show how a simple extension of the library could provide support for overlapping arrays.
@@ -123,7 +124,7 @@ many GPU-based systems, a general-purpose processor
 see Figure~\ref{fig:CPU-GPU}. Native programming models
 for such systems such as CUDA typically expose the distributed address spaces to the programmer, who has to write explicit 
 code for data transfers and device memory management.
-Often, programs for such systems even must be organized in multiple source files
+Often, programs for such systems  must be organized in multiple source files
 as different programming models and different toolchains
 are to be used for different types of execution unit.
 This enforces a low-level programming style. 
@@ -132,13 +133,11 @@ programming approaches have been proposed that abstract away the distribution
 by providing a virtual shared address space. Examples include directive-based
 language extensions such as OpenACC and OpenMP4.5, and C++-only approaches 
 such as the library-based skeleton programming framework SkePU \cite{Dastgeer-IJPP15}
-and the recent macro-based framework \textit{VectorPU}, 
-which we focus on in this paper as a case study.
+and the recent macro-based framework \textit{VectorPU}.
 
 \textit{VectorPU} \cite{VectorPU-2017} is an open-source\footnote{http://www.ida.liu.se/labs/pelab/vectorpu, https://github.com/lilu09/vectorpu} lightweight C++-only 
 high-level programming layer
 for writing single-source heterogeneous programs for Nvidia CUDA GPU-based systems.
-
 Aggregate operand data structures 
 passed into or out of  function calls are
 to be wrapped by special data containers known to VectorPU.
@@ -189,7 +188,7 @@ such as the GPU code: \verb:*( GW(x) + 2 ) = 3.14:.
 \texttt{GWI(x)} evaluates to a Thrust-compatible iterator onto the 
 GPU device copy of \texttt{x}, and \texttt{WEI(x)} to an iterator-end reference
 to the last element of \texttt{x} on CPU side. The current VectorPU prototype implementation does not
-(yet) type-check access-mode annotations in signatures of externally defined functions.
+(yet) check access-mode annotations in signatures of externally defined functions.
 %
 It is also possible to specify partial access of a \verb:vector:
 % that expand into pointers to the first and last element
@@ -244,10 +243,10 @@ void bar ( const float *x [[GR]], float *y [[GW]],
 \end{verbatim}}
 
 Here, the operand array pointed to by \verb.x. may be read (only) by the GPU within \verb.bar.,
-operand array \verb.y. may be written (only) by the GPU, and 
-operand array \verb.z. may be read or written (or both) by the GPU.
+operand array \verb.y. must be written (only) by the GPU, and 
+operand array \verb.z. may be read and/or written by the GPU.
 When calling \verb.bar., the
-first three operands need to be passed as VectorPU \verb.vector. 
+first three operands are  passed as VectorPU \verb.vector. 
 container objects.
 The \verb.size. formal parameter is a scalar (not a data container), so it
 will be available on GPU on a copy-in basis but no coherence will
@@ -258,8 +257,7 @@ It is also possible to put the annotations into a call, and hence characterize a
 
 {\footnotesize \begin{verbatim}
 // declare a CPU function:
-void foo ( const float *x, float *y,
-            float *z, int size );
+void foo ( const float *x, float *y, float *z, int size );
 
 // declare three vectors:
 vectorpu::vector<float> vx(100), vy(100), vz(100);
@@ -278,8 +276,7 @@ The following example shows how to use iterators:
 vectorpu::vector<My_Type> vx(N);
 std::generate( WI(vx), WEI(vx), RandomNumber );
 thrust::sort( GRWI(vx), GRWEI(vx));
-std::copy( RI(vx), REI(vx),
-           ostream_iterator<My_Type>(cout, ""));
+std::copy( RI(vx), REI(vx), ostream_iterator<My_Type>(cout, ""));
 \end{verbatim}}
 
 \noindent 
@@ -394,7 +391,7 @@ but makes local address calculations easy, and anyway only
 the accessed elements (the \texttt{pvector} range) will be transferred.
 As we will see later, it also simplifies coherence management
 for \emph{overlapping} \texttt{pvector} accesses, which was not 
-really foreseen as a use case in the original VectorPU design.
+really foreseen in the original VectorPU design.
 
 \vspace{1.4mm}
 \noindent
