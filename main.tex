@@ -82,6 +82,8 @@
 \DeclareMathOperator{\dom}{dom}
 \newcommand{\Overlap}[1]{O(#1)}
 
+\newenvironment{example}{\smallskip\par\noindent\emph{Example:}}{\medskip}
+
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
 
@@ -181,11 +183,11 @@ accesses are annotated correctly through VectorPU annotations the program cannot
 access an invalid data and the memory spaces are put in coherence when needed. We also 
 show that VectorPU tracks the validity status of the memory adequately. In this 
 section we abstract away the values stored in memory and we 
-do not deal with any form of aliasing. A more precise analysis of effects and aliasing is 
+do not deal with any form of aliasing. A more precise analysis of aliasing is 
 out of the scope of this paper, it could be for example inspired 
-from~\cite{Nielson1999}.
+from~\cite{Nielson1999} or from our extension to overlapping array (Section~\ref{sec:overlap-array}).
 We place ourself in a simplified setting where each variable is hosted in exactly two 
-memory locations, e.g.\ a CPU (main) memory and a GPU memory location, but the work could be extended to multiple memory 
+memory locations, e.g.\ a CPU (main) memory and a GPU memory location; our results could be extended to multiple memory 
 locations without any major difficulty.
 
 \subsection{An effect system for consistency between memory locations}
@@ -194,14 +196,13 @@ memory
 location on the consistency status of the memory. Each location is either in  
 \textit{valid} state when it holds a usable data 
 or \textit{invalid} state when the value at the location is not valid anymore.
-
 We express five  operations: reading, writing, 
 \Push\ for uploading the local memory location into the other one, and \Pull\ for the 
-contrary. \noop\ is an operation that does nothing.
+contrary. \noop\  does nothing.
  \[E::= \Push ~|~ \Pull ~|~ r~|~ w ~|~ %rw ~|~ 
 \noop\]
 
-These operations express  requirements and changes on a single memory 
+These operations involve a single memory 
 location. We 
 express 
 below the semantics of each of the operations on the consistency status of the concerned 
@@ -215,7 +216,6 @@ memory, and the second one is the status of the remote memory. For example, for 
 program running on a CPU while the remote memory is a GPU, a status $(V,I)$ means that 
 the memory is valid and can be read on the CPU, but is invalid on the GPU and should be 
 transferred before being usable there.
-
 Each operation has a signature in the sense that it may require a certain memory status 
 and 
 will produce another memory status. The signature of each operation is expressed below and is called its \emph{effect}.
@@ -244,8 +244,11 @@ is a  writing operation that modifies data locally but do not require validity, 
 invalidates the remote memory.  \Push\ uploads the local memory and thus makes valid the 
 distant memory; 
 it requires that the data is locally valid, and \Pull\ is the symmetrical operation.
+Applying these signature consists in trying to \emph{unify} the current memory status with the effect of the variable, potentially instantiating $X$ and $Y$ appropriately. No unification is possible if the status and the effect cannot be made identical by instantiating variables.
 
-Applying these signature consists in trying to \emph{unify} the current memory status with the effect of the variable by instantiating $X$ and $Y$ appropriately. For example an operation $r$ can be applied on a validity status $(V,V)$, leading to the validity status $(V,V)$ because $(V,V)$ can be unified with $(V,X)$ by instantiating $X=V$. However $r$ can not be applied on a validity status $(I,V)$ because $(V,X)$ cannot be unified with $(I,V)$: $I$ and $V$ cannot be unified.
+\begin{example}
+An operation $r$ can be applied on a validity status $(V,V)$, leading to the validity status $(V,V)$ because $(V,V)$ can be unified with $(V,X)$ by instantiating $X$ with $V$. However $r$ can not be applied on a validity status $(I,V)$ because $(V,X)$ cannot be unified with $(I,V)$: $I$ and $V$ are different.
+\end{example}
 
 An additional operation could be defined: 
  an 
@@ -254,18 +257,18 @@ validity and invalidate
 remote status: $(V,X)\mapsto (V,I)$. This operation is however not needed here but we will have a similar one at the annotation level, see below.
 
 \subsection{A language for modelling consistency and effects}\label{sec-core}
-We now create a core calculus to be able to reason on programs involving sequences of 
+We now create a core calculus to  reason on programs involving sequences of 
 effects on different memory locations. $x,y$ range over variables and we introduce  statements manipulating 
 variables. We use sequence and simple loops and conditionals. 
 Operations with effects 
-now apply to a variable;  the $\rem{E~x}$  is a remote operation 
- on the remote memory\footnote{Consequently, $\Pull$ could also be written: $\rem{\Push~x}$.}.  For example, a GPU procedure 
-writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem{r~y}$. We also have a $\noop$ operation that has no effect and can be considered as a neutral element for the sequence.
+now apply to a variable: $E$ $x$ denotes some operation $E$ on variable $x$;   $\rem{E~x}$  is a remote operation 
+ on the remote memory. We also have a $\noop$ operation that has no effect and can be considered as a neutral element for the sequence.
 Statements $S$ are defined as:
-
 {\small \[S::=E~x~|~\rem{E~x}~|~S;S'~|~\while(\cond) S ~|~ \IF{\cond}{S}{S'}~|~\noop\]}
-\noindent{}where $E$ $x$ denotes some operation $E$ on variable $x$, $E\!\in\! \{r,\, w,\,  
-\Push,\, \Pull,\, \noop\}$.
+\vspace{-3.5ex}
+\begin{example}
+A GPU procedure 
+writing $x$ and reading $y$ would correspond to the pseudo-code: $\rem{w~x};\rem{r~y}$. \end{example}
 
 We are  interested  in conditionals dealing 
 with the validity status of the variables. Other conditionals  are expressed as a generic 
@@ -274,7 +277,7 @@ well:
 \[\cond::=\isvalid~x~|~\isremvalid~x~|~x\oplus y\]
 %$\oplus$ replaces operations on values; we are not interested in evaluating them ; only 
 %to show that while can use values (perhaps to be improved)
-\noindent where \textit{isValid} $x$ and \textit{remIsValid} $x$ denote checks of the validity status flag of the local and remote location of $x$, respectively.
+\noindent where $\isvalid~x$, resp. $\isremvalid~x$,  denote checks of the validity status flag of the local, resp. remote, location of $x$.
 
 We now define a small step operational semantics for our core calculus.
 It relies on the validity status of variables, recorded in a store $\sigma$ mapping 
@@ -342,17 +345,16 @@ that are universally quantified in each rule.
  The first %three
  four rules present the 
 evaluation of conditional statements, we assume additional rules exist for evaluating 
-$\oplus$\footnote{We are only interested in cache consistency properties, we thus suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect of the operation $E$ on a variable $x$ updating the validity store, 
+$\oplus$\footnote{We  suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect of the operation $E$ on a variable $x$ updating the validity store, 
 and the \textsc{Remote Effect} rule applies an operation occurring on the distant memory, it 
 applies the symmetric of the effect of the operation to the variable: \emph{validity values are switched compared to the non-remote effect}. Note that \Push\ is the symmetric of 
-\Pull\ and we could have removed one of those two operations without loss of generality. 
+\Pull\ and we could have removed one of those two operations without loss of generality: $\Pull$ is the same as $\rem \Push$. 
 The last rules are standard ones for \symb{if} and \symb{while} statements.
 
 \noindent\emph{Initial state:} To evaluate a sequence of statements $S$ using the 
 variables 
-$\vars(S)$, we put it in a configuration with 
-an initial 
-store where data is hosted on the CPU and all variables are initially mapped to $(V,I)$: 
+$\vars(S)$, we create an initial configuration with 
+a store where data is hosted on the CPU and all variables are  mapped to $(V,I)$: 
 $\sigma_0=(x\mapsto 
 (V,I))^{x\in \vars(S)}$.
 
@@ -368,7 +370,7 @@ is \emph{stuck} if no reduction rule can be
 applied on $(S,\sigma)$.
 \begin{Property}[Progress]\label{prop:stuck}
  A configuration is stuck if the validity status of the accessed variable is 
-incompatible with the effect to be applied\footnote{We say that there is no unification  between $X$ and $Y$ if one of the two variables must have the value $V$, and the other one the value $I$. This relation is extended to pairs of variables.}:
+incompatible with the effect to be applied:\\[-1ex]
 \[\begin{array}{@{}l@{}}
 (S,\sigma)\not\to\ \iff~
  \begin{array}[t]{@{}l@{}}
@@ -381,7 +383,8 @@ S=E~x;S' \land \sigma(x)=(X,Y)
 							\land E:  (X',Y')\!\mapsto\! (Z,T)\ 
 							\\\qquad \land~\text{there is no unification  between } 
 							(X,Y)   
-							\text{ and } (Y',X')		
+							\text{ and } (Y',X')	\\
+\lor S\!= \noop	
 \end{array}
 \end{array}\]
 Note that this supposes that $\oplus$ always succeeds.
