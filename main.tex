@@ -389,15 +389,22 @@ S=E~x;S' \land \sigma(x)=(X,Y)
 \end{array}\]
 Note that this supposes that $\oplus$ always succeeds.
 \end{Property}
-\begin{proof}[Proof sketch]
-By case analysis on the first statement of $S$, there is always 
+\begin{proof}
+Recall each non-empty sequence of instruction, here $S$,  can be rewritten as $S';S''$ where $S$ 
+is neither a sequence nor \noop.
+If the sequence is empty, $S=\noop$, and the execution is finished, it corresponds to the last case of the rule.
+
+By case analysis on the first statement of $S'$, there is always 
 one rule applicable provided the premises of the rule can be evaluated.
-In the case of the last four rules this requires the evaluation of \cond. If $\oplus$ 
+
+In  case the statement is an if or a while, it corresponds to the last four rules this requires the evaluation of \cond. If $\oplus$ 
 always succeeds then \cond\ can always be 
-evaluated. The only case remaining is if there is no unification possible between the 
-effect of an operation and the current validity status of the affected variable, this 
-concerns the rule \textsc{Effect} and \textsc{Remote Effect} and corresponds to the two 
-cases expressed in the theorem.
+evaluated to either \True\ or \False\ and consequently one of the rule can always be applied.
+
+
+ The only cases remaining for $S$ are $E~x$ and $\rem {E~x}$. The applicable rules are \textsc{Effect} and \textsc{Remote Effect}. These rules can always be applied except if there is no unification possible between the 
+effect of an operation and the current validity status of the affected variable, i.e. there is no instantiation of $X$ and $Y$ such that both $\sigma(x)=(X,Y)$ and $E: (X,Y)\to(Z,T)$ in the case of \textsc{Effect}. This  corresponds to the two first
+cases expressed in the theorem (one for \textsc{Effect} and one for \textsc{Remote Effect}).
 \end{proof}
 
 
@@ -406,22 +413,24 @@ A state is said to be \emph{unsafe} if at least one variable is mapped to
 $(I,I)$.
 It is impossible to reach an unsafe state from the initial state.
 \end{Property}
-\begin{proof}[Proof sketch] 
-Unsafe states are avoided  because of the effects of operations: 
-only effect rules modify the store and no effect can reach $(I,I)$, except 
-\noop\ starting from $(I,I)$, which is sufficient to conclude as the inital state is not $(I,I)$.
+\begin{proof}
+The principle is that unsafe states are avoided  because of the effects of operations. Indeed 
+only the two effect rules (\textsc{Effect} and \textsc{Remote Effect}) modify the store and no effect can reach $(I,I)$, except 
+$\noop\ x$ starting from $\sigma(x)=(I,I)$. This is sufficient to conclude, by recursion, as the initial state is not $(I,I)$.
 \end{proof}
 
-\noindent
-   \emph{Example:} 
-    $w~ x;\rem{r~x}$ cannot be fully evaluated. Indeed, $(w x;\rem{r~x},(x\mapsto 
+\begin{example} The sequence
+   $w~ x;\rem{r~x}$ can never be fully evaluated and will lead to a stuck configuration. Indeed, $(w x;\rem{r~x},(x\mapsto 
     (V,I)))\to (\rem{r~x},(x\mapsto (V,I)))$, but  $\rem{r~x}$ requires that $x$ is 
     mapped to $(X,V)$ for some $X$ which is not the case.
+
 However if we add a \Push\ operation to ensure the validity of the accessed memory the 
 program $w~x;\Push~x;\rem{r~x}$ can be reduced as follows:\\
 $(w x;\rem{r~x},(x\mapsto (V,I)))\\~\qquad\to (\Push~x;\rem{r~x},(x\mapsto 
 (V,I)))\\~\qquad\to 
 (\rem{r~x},(x\mapsto (V,V)))\to (\noop,(x\mapsto (V,V)))$
+\end{example}
+ 
 
 %\subsection{Protecting Memory Accesses}
 %We now define protected operations as macros that can be compiled into the core 
@@ -1058,6 +1067,7 @@ in a function call $f$, we need to add to VectorPU the two following components:
           %\TODO{Can such overloading be done automatically, without programmer assistance? - C.}
 \end{itemize}
 
+\begin{example}
 As a simple example, let us consider the following set of \texttt{pvector}s and call sequence:
 
 \begin{verbatim}
@@ -1088,7 +1098,8 @@ f2( ... W(pv3) ... , RW(pv2) );
 
 \noindent
 hence we make sure that the access to \verb.pv2. in the subsequent
-call to \verb.f3. will be handled correctly. 
+call to \verb.f3. will be handled correctly.
+\end{example} 
 %This leads to invalidation of \verb.pv2., i.e., removal from $r_v$,
 %before delivering the actual call to \verb.f2..
 
