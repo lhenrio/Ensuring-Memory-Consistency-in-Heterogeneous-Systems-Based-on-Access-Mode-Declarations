@@ -943,11 +943,11 @@ Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-
 Taking a more global point of view, no verification is performed by the VectorPU framework and thus, the property of ``well-declared programs'' is not checked currently by the framework. In the current state of the library, the property ``well-declared programs''  must be ensured by the programmer. The implementation of VectorPU relies on the hypothesis that the function declarations are correct, because of this the current formalisation is a significant step forward as it allows us to express precisely what assumption is made by the library on the programmer's code.
 
 Such a check could either be done  by runtime verification checking that each function performs exactly the required access, or  statically by constraints on the program and a static analysis (involving some approximations, meaning  some correct programs could be rejected). The first solution  is not acceptable considering the target application domain because of the overhead involved by the dynamic checks. 
-Let us now try to figure out how difficult it would be to ensure that a given program verifies the ``well-declared'' property statically. We focus on the case of arrays that is the most interesting. Checking which accesses are performed on an array is a difficult task in general. However for reading access, declaring the  array of constant type could enforce a reading access and even allow us to infer the $R$ annotation for constant arrays. $RW$ is not constraining the access and is always a safe annotation. $W$ however requires all the elements to be written, checking this relies on a static analysis that is way beyond the scope of this paper and might be tricky. As already argued, the fact that the same variable does not appear twice is more  a restriction of the formalisation provided the same array is always declared with the same access ($RW$ in the worst case), an additional pass could modify the annotations of identical variables so that the least restrictive one is chosen. POssible aliasing between variables can be seen as a particular case of overlapping array, studied in the next section. 
+Let us now try to figure out how difficult it would be to ensure that a given program verifies the ``well-declared'' property statically. We focus on the case of arrays that is the most interesting. Checking which accesses are performed on an array is a difficult task in general. However for reading access, declaring the  array of constant type could enforce a reading access and even allow us to infer the $R$ annotation for constant arrays. $RW$ is not constraining the access and is always a safe annotation. $W$ however requires all the elements to be written, checking this relies on a static analysis that is way beyond the scope of this paper and might be tricky. As already argued, the fact that the same variable does not appear twice is more  a restriction of the formalisation provided the same array is always declared with the same access ($RW$ in the worst case), an additional pass could modify the annotations of identical variables so that the least restrictive one is chosen. Possible aliasing between variables can be seen as a particular case of overlapping array, studied in the next section. 
 
 Finally concerning expressiveness, the ``well-declared programs'' definition is a bit more flexible than what VectorPU targets at the moment because it is safe to declare in our framework functions that access some variables on the CPU and others on the GPU, and this is not planned in VectorPU, again due to the supported usage scenario.
 
-These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. It concerns the handling of arrays that may overlap; this generalizes the problem of identical variables and potential aliasing between variables.
+These differences highlight interesting improvement directions for VectorPU while we can still consider that the current article  is a faithful formalisation of the library. In the next section, we investigate a feature that is not yet supported by VectorPU, but exists in SkePU. It concerns the handling of arrays that may overlap; this generalizes the problem of  aliasing between variables.
  We can somehow consider the theoretical results below as a specification of a future extension of the library.
 
 \section{Overlapping arrays}\label{sec:overlap-array}
@@ -1023,10 +1023,11 @@ We consider $\AM$ the set of all access modes declared for a given function and 
 \end{mathpar}
 \caption{Extension of access mode annotations to deal with overlapping arrays}\label{Overlap-ext-tab}
 \end{table}
+\begin{example}
 To understand the principle of the approach, consider the case where 
 $W\ \abs x\in \AM$ then $ \forall i\in\range(x). w\ x[i]$ occurs in all execution 
 paths of $S$, and thus for all arrays $y$ overlapping $x$  we must have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$. If we have no additional information we will ensure that $RW\ \abs y$ is also in the set of access mode declarations, which is always safe.
-
+\end{example}
 
 \begin{definition}[Extension of access mode declarations for overlapping arrays]\label{def-overlap-annotation}
 Consider a set $\AM$ of access mode declarations.
@@ -1035,7 +1036,7 @@ Consider a set $\AM$ of access mode declarations.
 
 \end{definition}
 
-The following theorem states that if the set of function parameters is extended according to the preceding extension, then memory consistency is ensured. Note that it means that a set of artificial parameters are to be added to some functions, in the sense that  data-transfers and validity status modifications  have to be performed on vectors that are not among the original parameters of the function.
+The following theorem states that if the set of function parameters is extended according to the preceding definition, then memory consistency is ensured. Note that it means that a set of artificial parameters are to be added to some functions, in the sense that  data-transfers and validity status modifications  have to be performed on vectors that are not among the original parameters of the function.
 
 \begin{Theorem}\label{thm-correct-array-overlap}
 Consider a program that is well-declared according to Definition~\ref{def:well-declared-array}, not taking into account  overlapping arrays. Suppose its access mode declarations are extended according to Definition~\ref{def-overlap-annotation} then the execution of the obtained program verifies both subject reduction and progress, even in presence of overlapping arrays.
