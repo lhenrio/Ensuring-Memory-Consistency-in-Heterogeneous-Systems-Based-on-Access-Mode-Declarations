@@ -512,10 +512,11 @@ a dynamic abstraction of the consistency status of the memory can be used.
 %consistent with the validity status of the real memory.
 Abstract variables are not part of the applicative code but can be used in the access mode declarations. 
 
-Consider for example an array $x$. As it is not desirable to store the information of the validity status of all the elements of the array, we will create for this array and abstract variable $\abs x$ that will represent all the elements of the array -- $x[i]$ -- from the validity status point of view. If the representation was precise, a value $(V,I)$ for $\abs x$ would mean that all the elements of the array are valid locally and invalid remotely. In practice we need to authorize some approximation of the validity status, at least because most operations only act on some of the elements of the array. Consequently, some loss of information: if $\sigma(\abs x)=(V,I)$ then each element of the array $x$ must be locally valid, the remote elements may be valid or invalid. like with non-abstract variables, having $\sigma(\abs x)=(I,I)$ is  not desirable as the coherence protocol would be unable to know where are the valid elements of the array (even if for all $i$, $x[i]=(V,I)$ or $x[i]=(I,V)$). In the case of arrays and most of the usual data-structures, the mapping between abstract and concrete elements is quite trivial. From a theoretical point of view,  it is possible to define an abstraction on  such that for example $\abs x=\abs y$ but then the definition of the mapping would be very difficult to use.
+Consider for example an array $x$. As it is not desirable to store the information of the validity status of all the elements of the array, we will create for this array and abstract variable $\abs x$ that will represent all the elements of the array -- $x[i]$ -- from the validity status point of view. If the representation was precise, a value $(V,I)$ for $\abs x$ would mean that all the elements of the array are valid locally and invalid remotely. In practice we need to authorize some approximation of the validity status, at least because most operations only act on some of the elements of the array. Consequently, some loss of information: if $\sigma(\abs x)=(V,I)$ then each element of the array $x$ must be locally valid, the remote elements may be valid or invalid. Like with non-abstract variables, having $\sigma(\abs x)=(I,I)$ is  not desirable as the coherence protocol would be unable to know where are the valid elements of the array -- even if for all $i$, $x[i]=(V,I)$ or $x[i]=(I,V)$. In the case of arrays and  usual data-structures, the mapping between abstract and concrete elements is quite trivial: one abstract variable represents a whole data structure. Other mappings (one variables for several structures or splitting a data structure) could be defined but their  definition might be too complex to be usable in practice.
+%From a theoretical point of view,  it is possible to define an abstraction such that for example $\abs x=\abs y$ but then the definition of the mapping would be very difficult to use.
 
 
-More technically, the abstraction and declaration layer relies on two principles:
+The abstraction and declaration layer relies on two principles:
 \begin{itemize}
 \item Each variable $x$ has an abstract variable $\abs x$ that represents it. In this 
 section there is 
@@ -523,8 +524,7 @@ a single variable for each representative, but when we deal with arrays we will
 have a single representative for the whole array.
 \item It is safe to ``forget'' that one memory space holds a valid copy of the data if 
 the other memory space has a valid one. In other words, $(V,I)$ (resp. $(I,V)$) is a safe 
-abstraction of $(V,V)$ and we denote $(V,I)\leq (V,V)$ (resp. $(I,V)\leq (V,V)$). Of 
-course, we have $(X,Y)\leq (X,Y)$ for any $X$ and $Y$.
+abstraction of $(V,V)$ and we have $(V,I)\!\leq\! (V,V)$ (resp. $(I,V)\!\leq\! (V,V)$). Also for any $X$ and $Y$ we have $(X,Y)\!\leq\! (X,Y)$.
 \end{itemize}
 
 \paragraph{Syntax}
@@ -538,7 +538,7 @@ We now define access mode declarations:\\[-3.3ex]
 These access modes declare the kind of access (read $R$, write $W$, or read and/or write 
 $RW$) that 
 can be performed on the variable $x$ represented by $\abs x$. In a set 
-of access mode declarations the same variable cannot appear twice\footnote{This restriction simplifies the formal definition and the reasoning. Extending the results to the same variable appearing twice with the same access mode is trivial (e.g. to take into account the same parameter passed twice to the same function). Having the same variable declared twice with different access modes is not safe in the general case. Section~\ref{sec:overlap-array} will study more precisely the case of overlapping arrays, which somehow generalizes aliasing.}. There exist declared 
+of access mode declarations the same variable cannot appear twice\footnote{This restriction simplifies the formal definition and the reasoning. Extending the results to the same variable appearing twice with the same access mode is trivial (if the same parameter is passed twice to the same function). Having the same memory location declared twice with different access modes is not safe in the general case but Section~\ref{sec:overlap-array} will study more precisely the case of overlapping arrays.}. There exist declared 
 access modes for  local accesses and for  the 
 remote memory space.
 
@@ -668,7 +668,7 @@ $(S_0,\sigma_0)\to(S_1,\sigma_1)\to\ldots\to(\noop,\sigma_n)$, there is an inter
 state $(S_i,\sigma_i)$ such that $S_i=S;S''$ for some $S''$.
 \end{definition}
 Notice that an operation $S$ can only appear in some of the execution paths of $S'$ if  $S\in 
-S'$: if $(S_0,\sigma_0)\to^* (S;S',\sigma)$ then $S\in S_0$.
+S'$: if $S$ is an operation, i.e. a single statement, then $(S_0,\sigma_0)\to^* (S;S',\sigma)$ then $S\in S_0$.
 
 
 \begin{definition}[Well-declared program]\label{def-WD}
@@ -697,6 +697,10 @@ is entirely executed either on a CPU or on a GPU, the formalisation is a bit mor
 For a well-declared program containing $\AM\{S\}$, for any $x$, we cannot have $\rem {E\ 
 x} \in S$ and $E'\ x \in S$.
 \end{Property}
+\begin{proof}
+This is a consequence of the uniqueness of abstract variables in access mode declarations. Indeed, if $E'\ x\in S$ and the program is well-declared, then there must be $R\ \abs x$ or $W\ \abs x$ or $RW\ \abs x$ in $\AM$. Similarly, as $\rem {E\ x} \in S$, if the program is well-declared $\rem {R\ \abs x}$ or $\rem {W\ \abs x}$ or $\rem {RW\ \abs x}$ in $\AM$, it is impossible to have two different entries for the same variable and thus we cannot have $\rem {E\ 
+x} \in S$ and $E'\ x \in S$.
+\end{proof}
 
 \smallskip
 
@@ -777,7 +781,7 @@ cases $\sigma'(\abs x)\leq\sigma'(x)$.
 
 \noindent$\bullet$ If  $x$ is not accessed but is in the declaration, the 
 reasoning is the same as if it was only read. 
-Note that the variable cannot be declared 
+Note that a variable that is not accessed cannot be declared 
 in write mode, $W~\abs x \in \AM$, by
 Definition~\ref{def-WD}.
 \end{proof}
@@ -799,9 +803,8 @@ We consider a reduction  $(\transl{\AM\{S\}},\sigma) \to^* (S,\sigma_s) \to^* \l
 similarly  to the proof above.
 
 By definition of well-declared 
-programs and because of the signature of effects ($w~x$ cannot be stuck), only two 
-cases have to be analysed for the local operations (plus two similar cases for remote 
-statements):
+programs and because of the signature of effects ($w~x$ cannot be stuck), only four
+cases have to be analysed for the local operations:
  \begin{itemize}
 \item \Pull\ operations (on $x$ and $\abs x$) in the translation of $R~\abs x$ or 
 $RW~\abs x$. Unification 
@@ -809,6 +812,7 @@ requires that $\sigma(x)=(X,V)$ and  $\sigma(\abs x)=(Y,V)$.
 \item $r~x$ operation in the evaluation of $S$. Unification 
 requires that $\sigma'(x)=(V,X)$ where $\sigma'$ is the store in which the read access is 
 to be evaluated.
+\item $\Push~x$, $\Push~\abs x$, and $\rem{r~x}$ that are similar to the cases above, they require the symmetric validity status in similar conditions (not detailed below).
 \end{itemize}
 Indeed, access mode declarations do not generate reading operations, and by definition 
 function statements contain no \Push\ or \Pull.
@@ -842,11 +846,17 @@ for some $X$.
 %\Pull). 
 %Other cases are similar.
 \end{proof}
+\begin{example}
+Consider the example above of a variable written on the CPU, and then read on the GPU, 
+a well-declared program encoding this behaviour would be:\\
+$\begin{array}{l}
+RW~\abs x\{w~x\};\\
+\rem{R~\abs x}\{\rem{r~x}\}
+\end{array}$\\
+This code automatically generates the \Push\ instruction that prevents 
+the program from being stuck, indeed the $RW$ annotation ensures that after executing the first line, the validity status pf $\abs x$ is: $(V,I)$, the encoding of  for $\rem{R~\abs x}$ checks whether the remote status is valid, as it is not the statements: $\Push~x;\Push~\abs x;$ are executed.
+\end{example}
 
-Considering the example above of a variable written on the CPU, and then read on the GPU, 
-a well-declared program encoding this behaviour would be  $RW~\abs x\{w~x\};\rem{R~\abs 
-x}\{\rem{r~x}\}$. This code automatically generates the \Push\ instruction that prevents 
-the program from being stuck.
 \subsection{Effects and Access Mode Declarations for Arrays}\label{sec-arrays}
 In array structures, the 
 validity status of the whole array is abstracted away by a single validity status pair. 
@@ -858,7 +868,7 @@ element of the array. More precisely the new operations on arrays and their elem
 Synchronisation operations (\Push\ and \Pull) exist for arrays but the whole array is 
 synchronised, and we write $\Push~x$ and $\Pull~x$ as above.
 All the elements of the array are represented by a single abstract variable: $\abs{x}$ 
-represents a safe abstraction of the validity status of all $x[i]$. In other words, as soon as one element of the array $x$ is invalid locally (resp. remotely) the validity status of $\abs x$ can only be $(I,V)$ (res. $(V,I)$).
+represents a safe abstraction of the validity status of all $x[i]$. In other words, as soon as one element of the array $x$ is invalid locally (resp. remotely) the validity status of $\abs x$ can only be $(I,V)$ (resp. $(V,I)$).
 
 The semantics of access mode declarations and programs is unchanged because 
 synchronisation operations and access mode declarations do not concern array elements.
@@ -878,23 +888,24 @@ to the rules of Definition~\ref{def-WD}, we have\footnote{$\range(x)$ returns th
 paths of $S$,
 \item Plus the same rules for remote operations.
 \end{itemize}
-Where $\range(x)$ is the set of valid 
- indexes for an array $x$.
 \end{definition}
 
-The other properties are expressed similarly and both \emph{subject-reduction}, 
+\begin{example}
+Consider the function body $\rem {w~x[3]}$, corresponding to a function made of the C++ statement $x[3]=0$ executed on a GPU. The only safe access mode declaration for it is $\rem{RW~\abs x}$ indeed, some of the elements of the array are written but not all. At the end of the function execution the valid copy of the array is on the GPU.
+\end{example}
+
+The other definitions and properties are expressed similarly for arrays, compared to standard variables, and both \emph{subject-reduction}, 
 Theorem~\ref{thm-SR}, and \emph{progress}, Theorem~\ref{thm-progress}, are 
 still valid. The only change is the ``correct abstraction of the memory state'' criteria -- see Definition~\ref{CorrectAbstraction} --  
-that becomes $\forall x\in 
-\vars(S).\,\forall i\in\range(x).\, \sigma(\abs x)\leq\sigma(x[i])$ instead of $\forall 
-i\in\range(x)$ for arrays. The proofs are similar except in the case of $W~x$ 
-declarations where the fact that all elements of the array must be written is necessary 
-to ensure that no element is in the status $(I,V)$ (which could not be safely represented 
-by $(V,I)$) at the end of the function execution. If we focus on the proof of 
-Theorem~\ref{thm-SR}, case ``$x$ is written, sub-case (1) we have $\sigma'(\abs x)=(V,I)$ 
-which is a safe abstraction because \emph{all elements have been written}, and thus 
-$\sigma'(x[i])=(V,I)$ for all $i$. If one element $j$ was not written, we could have had 
-$\sigma'(x[i])=(I,V)$ which would invalidate the theorem. Overall, only arguments about correctness of the abstractions need to be adapted, and we can prove the following theorem.
+that becomes 
+\[\forall x\in 
+\vars(S).\begin{array}[t]{l}
+\sigma(\abs x)\leq\sigma(x) \text{ if $x$ is not an array} \\
+	\forall i\in\range(x).\, \sigma(\abs x)\leq\sigma(x[i]) \text{ if $x$ is an array}
+\end{array}
+\]
+
+
 %
 %
 %\subsection{Towards Array Accesses: Adding an abstraction layer}
@@ -912,11 +923,22 @@ $\sigma'(x[i])=(I,V)$ which would invalidate the theorem. Overall, only argument
 \begin{Theorem}\label{thm-correct-array}
 If a program using arrays is well-declared according to Definition~\ref{def:well-declared-array} then its execution verifies both the subject-reduction and the progress property.
 \end{Theorem}
+\begin{proof}[Proof sketch]
+ The proofs are similar to the non-array case except in the case of $W~x$ 
+declarations where the fact that all elements of the array must be written is necessary 
+to ensure that no element is in the status $(I,V)$ (which could not be safely represented 
+by $(V,I)$) at the end of the function execution. If we focus on the proof of 
+Theorem~\ref{thm-SR}, case ``$x$ is written, sub-case (1) we have $\sigma'(\abs x)=(V,I)$ 
+which is a safe abstraction because \emph{all elements have been written}, and thus 
+$\sigma'(x[i])=(V,I)$ for all $i$. If one element $j$ was not written, we could have had 
+$\sigma'(x[i])=(I,V)$ which would invalidate the theorem. Overall, only arguments about correctness of the abstractions need to be adapted.
+\end{proof}
+
 \subsection{Discussion: Similarities and differences relatively to VectorPU}
 
 
 
-Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-AM} (valid for simple memory locations or arrays), with the VectorPU implementation of the protocol for simple arrays, Figure~\ref{fig:vectorpucoherence}. Except from the order of operations and minor changes, the structure is the same and the form of operations is similar. The main difference is that there is no view of abstract vs. concrete variables, however, if we consider that transfer operations on abstract variables have no effect, and that validity status of concrete variables can be abstracted away, the code is  the same as the formalisation. 
+Let us compare the formal definition of the coherence protocol, Figure~\ref{sem-AM} (valid for simple memory locations or arrays), with the VectorPU implementation of the protocol for simple arrays, Figure~\ref{fig:vectorpucoherence}. Except  the order of operations and minor changes, the code is similar. The main difference is that there is no view of abstract vs. concrete variables, however, if we consider that transfer operations on abstract variables have no effect, and that validity status of concrete variables can be abstracted away, the code is  the same as the formalisation. 
 
 Taking a more global point of view, no verification is performed by the VectorPU framework and thus, the property of ``well-declared programs'' is not checked currently by the framework. In the current state of the library, the property ``well-declared programs''  must be ensured by the programmer. The implementation of VectorPU relies on the hypothesis that the function declarations are correct, because of this the current formalisation is a significant step forward as it allows us to express precisely what assumption is made by the library on the programmer's code.
 
