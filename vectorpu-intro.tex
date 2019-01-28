@@ -299,6 +299,115 @@ overlapping) \texttt{pvector} objects as seemingly different \texttt{vector}
 arguments that however are just windows onto
 a common \texttt{vector} container variable. 
 
+
+
+
+% CK new 190127 text from LL:
+
+\subsection{Partial Vectors}
+%{{{
+\label{sec:Partial Vectors}
+
+% first paragraph replaced by old pvector description below:
+%To cope with functions that operate on only a regular part of a normal VectorPU vector
+%efficiently, VectorPU provides a specialized kind vector called partial vector,
+%that can represent a partial range of a normal vector.
+
+% New 180916 CK:
+Using iterators, it is possible to define, in VectorPU, references to
+contiguous subranges of a vector,
+called \textit{partial vectors} (\texttt{pvector}s), 
+which can be passed as \texttt{vector}-compatible
+operands to a function instead of an entire \texttt{vector}.
+In this way, it is possible to pass several (disjoint or even
+overlapping) \texttt{pvector} objects as seemingly different \texttt{vector}
+arguments that however are just windows onto
+a common \texttt{vector} container variable. 
+In contrast to \texttt{vector}s without \texttt{pvector}s, where coherence is 
+managed automatically by VectorPU, the coherence 
+management in the presence of \texttt{pvector}s 
+is exposed to the programmer.
+
+A partial vector can be initialized by two iterators to a normal VectorPU \texttt{vector} (we call it \emph{mother vector}).
+% representing the convex closure of the index ranges of
+% all contained partial vectors. 
+No new memory is allocated for this partial vector, 
+only the two iterators are stored, 
+and the coherence state for its range in the mother vector.
+% for the range of data this partial vector contains.
+When a partial vector is declared, it automatically
+inherits the coherence state information
+from its mother vector. 
+% already said above:
+% Afterwards, VectorPU algorithms can operate on the initialized partial vector
+% in the same way as for other VectorPU vectors.
+
+\begin{figure}
+\noindent 
+\begin{minipage}{\linewidth}
+\begin{small}
+\begin{verbatim}
+struct my_set {
+   template <class T>
+   __host__ __device__
+      void operator() (T &x) { x+=101; } 
+};
+vectorpu::vector<int> vx(10);  // the mother vector
+vectorpu::pvector<int> vy(x, vx.begin(), vx.begin()+2);
+vectorpu::for_each<int>( GWI(vy), GWEI(vy), my_set() );
+vectorpu::for_each<int>( GWI(vy), GWEI(vy), my_set() );
+SR( vy );  // explicit coherence management
+vectorpu::for_each<int>( RI(vx), REI(vx), [](auto vx) {cout<<x<<" ";} );  
+\end{verbatim}
+\end{small}
+\end{minipage}
+\caption{\label{fig:pvector}Example of using a partial vector (\texttt{pvector} and the \texttt{SR} macro for explicit coherence management. (Note: \texttt{pvector} is a short form and actually called \texttt{parco\_vector} in the VectorPU API.)}
+\end{figure}
+
+% One important point to make this mechanism work is for the case 
+The aliasing introduced by \texttt{pvectors} can lead to coherence problems. One such scenario could be that the
+programmer intends to operate on the previous \texttt{vector} again after
+some part of it was updated via a \texttt{pvector}, 
+hence the whole \texttt{vector} would be in an inconsistent state.
+In such cases, VectorPU expects the programmer to use a macro \texttt{S$X$} (Synchronize for an access attribute $X$,
+such as \verb.SR. for synchronized read)
+just before the programmers operate on the whole vector again.
+It may be inefficient for a \texttt{pvector} to perform the \texttt{S$X$} synchronization
+automatically, because multiple operations can be performed on the same \texttt{pvector} 
+before accessing the whole \texttt{vector} again, 
+and because the \texttt{pvector}
+has no knowledge about when the operations on itself will be finished, hence
+keeping them coherent each time is not necessary and thus a waste of performance.
+
+% Listing~\ref{lst:parco_vector} 
+Figure~\ref{fig:pvector}
+shows an example of using a \texttt{pvector} and the 
+\texttt{S$X$} macro.
+It initializes a mother vector \texttt{vx}
+and a \texttt{pvector} \texttt{vy} on it.
+The following two lines change part of \texttt{vy}'s value multiple times. % by operating on the \texttt{pvector}
+%using the functor in Listing~\ref{lst:skeleton_programming}.
+The \texttt{SR} macro explicitly restores coherence for
+\texttt{vy} before the following read access, 
+resulting in a write-back of \texttt{vy} elements
+to their locations in \texttt{vx},
+% only once for the multiple changes partially, 
+thus also \texttt{vx} as a whole becomes coherent again
+and line 6 is safe to operate on the whole \texttt{vx}.
+
+% CK: I do not understand this, dropped for now.
+% For applications in which the workload changes dynamically from one iteration to another,
+% e.g.\ a parallel reduction on GPU where the workload 
+% shrinks by half at each iteration,
+% it is possible to initialize \texttt{pvector}s dynamically.
+% Hence, when switching to a CPU implementation 
+% as the workload is small enough,
+% the partial data get coherence-managed automatically
+% by VectorPU.
+%}}}
+
+
+
 \begin{figure}[tb]
 \begin{minipage}{.48\textwidth}
 \begin{small}
@@ -370,9 +479,16 @@ void coherent_on_gpu_rw(){
      % start_pos(0) {}
 \end{figure}
 
-\vspace{1.4mm}
-\noindent
-\textit{Implementation notes }
+
+
+
+%\vspace{1.4mm}
+%\noindent
+%\textit{Implementation notes }
+\subsection{Implementation Notes}
+
+\paragraph{Coherence protocol}
+%
 In the source code of VectorPU, the code
 relevant for our work is the part of \verb+vectorpu.h+%
 \footnote{The VectorPU source code can be found at
@@ -384,6 +500,49 @@ simple \texttt{vector}s) follows a
 simple valid-invalid protocol.
 %(single-reader single-writer sharing).
 
+% CK new 190127 - text snippet from LL:
+\paragraph{Expansion of macro annotations to device-specific pointers}
+
+For function parameters, the macro annotations expand into appropriate C code to fit their function call context.
+For illustration, we show the simplified code after a function parameter's expansion ($\longrightarrow$) for four typical annotations,
+where \texttt{vx} refers to a VectorPU \texttt{vector} instance:
+
+\begin{small}
+\begin{itemize}
+ \item \texttt{R(vx)} $\longrightarrow$ 
+ \begin{minipage}[t]{0.8\textwidth}
+  \texttt{set\_coherence\_state();}\\
+  \texttt{return this->std::vector<T>::data();}\\
+  \texttt{//casted as const in return value}
+ \end{minipage}
+ \item \texttt{W(vx)} $\longrightarrow$ 
+ \begin{minipage}[t]{0.8\textwidth} \texttt{set\_coherence\_state();}\\
+ \texttt{return this->std::vector<T>::data();}
+ \end{minipage}
+ \item \texttt{GR(vx)} $\longrightarrow$ \begin{minipage}[t]{0.8\textwidth}
+ \texttt{set\_coherence\_state();}\\
+ \texttt{return thrust::raw\_pointer\_cast(}\\
+ \hspace*{1em}\texttt{\& (* thrust::device\_vector<T>::begin() ) );}\\
+ \texttt{//casted as const in return value}
+ \end{minipage}
+ \item \texttt{GW(vx)} $\longrightarrow$ 
+\begin{minipage}[t]{0.8\textwidth} \texttt{set\_coherence\_state(); return thrust::raw\_pointer\_cast(}\\
+\hspace*{1em}\texttt{\& (* thrust::device\_vector<T>::begin() ) );}
+\end{minipage}
+\end{itemize}
+\end{small}
+
+Hence, each annotated parameter is expanded to some code snippet\footnote{One can think of those code snippets as
+anonymous functions or lambda functions. 
+In the real scenarios these code snippets are encapsulated within a function,
+and each macro as shown above expands to a call to its function.}.
+In all scenarios the expanded macros first update the coherence state according to the annotation's semantics.
+Then, for the CPU cases, a pointer to a \texttt{std::vector} is returned,
+and for the GPU cases, a pointer to a Thrust pointer (which is a pointer to GPU memory space) is returned.
+For read-only cases, the return value is casted to \texttt{const} to ensure type safety in its function invocation.
+For write-only cases, no such \texttt{const} cast happens.
+
+\paragraph{Partial vector implementation and memory management}
 % new 180916 CK:
 For implementing the \texttt{pvectors} atop \texttt{vector}s, 
 VectorPU uses the simplistic approach of allocating memory for
@@ -396,9 +555,28 @@ As we will see later, it also simplifies coherence management
 for \emph{overlapping} \texttt{pvector} accesses, which was not 
 really foreseen as a use case in the original VectorPU design.
 
-\vspace{1.4mm}
-\noindent
-\textit{Efficiency }
+% CK new 190127 input from LL:
+In order to better utilize the device memory,
+a future extension of VectorPU could implement 
+\emph{lazy allocation}.
+In lazy allocation mode, VectorPU maintains for each 
+\texttt{vector} another state
+flag called \texttt{is\_allocated}
+to track whether it is allocated for host/device memory or not.
+When a VectorPU \texttt{vector} is declared,
+by default, no device memory is really allocated and the \texttt{is\_allocated} flag is set to false.
+Only upon its first use in a function call as an
+annotated \texttt{vector} argument,
+the flag \texttt{is\_allocated} is checked.
+If it is false (not allocated), device memory is allocated,
+otherwise, the memory is already allocated and no new memory will be allocated.
+Afterwards, the function call continues.
+
+%\vspace{1.4mm}
+%\noindent
+%\textit{Efficiency }
+\subsection{Efficiency}
+
 Using only available C++(11) language features, 
 VectorPU provides a flexible unified memory
 view where all data transfer and device memory management
