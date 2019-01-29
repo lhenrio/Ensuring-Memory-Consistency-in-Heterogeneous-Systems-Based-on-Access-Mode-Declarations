@@ -1049,7 +1049,7 @@ Trivially, the first two rules of Table~\ref{Overlap-ext-tab} are sufficient to 
 \begin{quote}
 For every $y$ overlapping $x$, if $i$ is in the range in common between $x$ and $y$, we have $w\ x[i]\in S \implies (W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$.
 \end{quote}
-By a simple case analysis on the possible annotations and the possible operations performed on the arrays, we deduce that the access modes added by the four last rules of Table~\ref{Overlap-ext-tab} are sufficient to ensure this rule and the symmetrical one for remote writing.
+By a simple case analysis on the possible annotations and the possible operations performed on the arrays, we deduce that the access modes added by the four last rules of Table~\ref{Overlap-ext-tab} are sufficient to ensure the statement above. Finally the symmetrical statement for remote writing is ensured in the same way.
 \end{proof}
 
 
@@ -1061,7 +1061,7 @@ By a simple case analysis on the possible annotations and the possible operation
 To implement the proposed mechanism that ensure the safety of overlapping vector accesses
 in a function call $f$, we need to add to VectorPU the two following components:
 \begin{itemize}
-    \item A representation $r_v$ that allows to retrieve, for any given \texttt{pvector} $pv$
+    \item A representation $r_v$  to retrieve, for any given \texttt{pvector} $pv$
              of a \texttt{vector} $v$, the set of all other valid \texttt{pvector}s of $v$ 
              that overlap with $pv$.
              $r_v$ is initialized as empty when declaring a new \texttt{vector} $v$,
@@ -1167,7 +1167,7 @@ can be updated dynamically (insertion, removal) in time  $O(\log n)$ and
 can retrieve the set of all $k$ intervals overlapping with a query interval
 in time $O(k+\log n)$; the space requirements is $O(n\log n)$.
 
-This time and space could alternatively be saved if one had a precise enough static analysis that could infer potential overlapping between arrays, choosing a precise enough static analysis, implementing it or designing a dedicated one is outside the scope of this paper.
+The time and space required to handle overlapping arrays at runtime could be saved with a precise enough static analysis that would infer potential overlapping between arrays; choosing a precise enough or static analysis designing a dedicated one is outside the scope of this paper.
 
 % 180916 CK: I disabled the SkePU section for now,
 % as we now have the better VectorPU pvector use case instead.
@@ -1184,7 +1184,7 @@ Most of the verification works related to memory consistency focus on coherence
 protocols 
 and/or 
 weak memory models~\cite{pong1997verification}. 
-Among them, one could cite~\cite{Gerth1999}, a formal specification of a caching 
+Among them, one could cite works on a lazy caching algorithm~\cite{Gerth1999}, a formal specification of a caching 
 algorithm, and its verification in TLA~\cite{Ladkin1999}. These works shows the 
 difficulty to reason on memory coherency, but also that specifications in these models 
 should rely on a few simple instructions on the type of memory accessed, a bit similarly 
@@ -1197,8 +1197,8 @@ that each component accesses a valid memory space.
 
 More recently, and adopting a more language oriented approach, Crary and 
 Sullivan~\cite{Crary:POPL:2015} designed 
-a calculus for expressing ordering of memory accesses in weak memory models. In this paper, we 
-are interested in a much simpler problem where memory access is  sequential 
+a calculus for expressing ordering of memory accesses in weak memory models. We 
+are interested here in a much simpler problem where memory access is  sequential 
 and clearly identified but the objective is to prove the correctness of simple cache-coherency operations. 
 Even an  extension of this work for parallel processes would  result in a 
 simpler model than the ones that exist for weak memory models because of the explicit 
@@ -1209,7 +1209,7 @@ correctness of a generic cache coherence protocol expressed as part of the seman
 the calculus. Compared to this work, we are interested in explicit statements on memory 
 accesses and thus the cache consistency is partially ensured  by the programmer 
 annotations, making the approach and the properties proven significantly different. Some 
-aspects of the approaches could however been made more similar, e.g. by extending our 
+aspects of the approaches could have been made more similar, e.g. by extending our 
 work to more than two address spaces or adopting a different  syntax. However our problem 
 and formalisation are quite simpler, and we 
 believe easier to read, while sufficient for our study.
