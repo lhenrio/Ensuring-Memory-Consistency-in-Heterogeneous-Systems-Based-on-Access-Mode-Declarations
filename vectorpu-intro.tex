@@ -270,6 +270,7 @@ Here, the access mode specifiers and the resulting coherence policy
  only apply to that particular invocation of \verb-foo-, while other
 invocations of \verb-foo- might use different access mode specifiers.
 
+\begin{example}
 The following example shows how to use iterators:
 
 {\footnotesize \begin{verbatim}
@@ -284,7 +285,7 @@ where \verb.std::generate. is a CPU function filling a section between
 two addresses with values (here, random numbers),
 and \verb.thrust::sort. denotes the GPU sorting functionality
 provided by the Nvidia Thrust library. 
-
+\end{example}
 % CK 190926: moved to new subsection 2.1 on pvectors
 % % New 180916 CK:
 % Using iterators, it is possible to define, in VectorPU, references to
