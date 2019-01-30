@@ -554,21 +554,21 @@ for \emph{overlapping} \texttt{pvector} accesses, which was not
 really foreseen 	in the original VectorPU design.
 
 % CK new 190127 input from LL:
-In order to better utilize the device memory,
-a future extension of VectorPU could implement 
-\emph{lazy allocation}.
-In lazy allocation mode, VectorPU maintains for each 
-\texttt{vector} another state
-flag called \texttt{is\_allocated}
-to track whether it is allocated for host/device memory or not.
-When a VectorPU \texttt{vector} is declared,
-by default, no device memory is really allocated and the \texttt{is\_allocated} flag is set to false.
-Only upon its first use in a function call as an
-annotated \texttt{vector} argument,
-the flag \texttt{is\_allocated} is checked.
-If it is false (not allocated), device memory is allocated,
-otherwise, the memory is already allocated and no new memory will be allocated.
-Afterwards, the function call continues.
+% In order to better utilize the device memory,
+% a future extension of VectorPU could implement 
+% \emph{lazy allocation}.
+% In lazy allocation mode, VectorPU maintains for each 
+% \texttt{vector} another state
+% flag called \texttt{is\_allocated}
+% to track whether it is allocated for host/device memory or not.
+% When a VectorPU \texttt{vector} is declared,
+% by default, no device memory is really %allocated and the \texttt{is\_allocated} % flag is set to false.
+% Only upon its first use in a function call % as an
+% annotated \texttt{vector} argument,
+% the flag \texttt{is\_allocated} is checked.
+% If it is false (not allocated), device % memory is allocated,
+% otherwise, the memory is already allocated % and no new memory will be allocated.
+% Afterwards, the function call continues.
 
 %\vspace{1.4mm}
 %\noindent
