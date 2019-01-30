@@ -321,19 +321,19 @@ sequence nor \noop. $\sigma[x\mapsto (X,Y)]$ is the update operation on maps.
 
 \inferrule[While-True]
 {\feval{\cond}{\sigma} }
-{(\while(\!\cond) S;S',\sigma)\!\to\! (S;\while(\!\cond) S;S',\sigma)}
+{(\while(\!\cond) S;\!S',\sigma)\!\to\! (S;\!\while(\!\cond) S;S',\sigma)}
 \qquad
 \inferrule[While-False]
 {\neg\feval{\cond}{\sigma} }
-{(\while(\!\cond) S;S',\sigma)\!\to\! (S',\sigma)}
+{(\while(\!\cond) S;\!S',\sigma)\!\to\! (S',\sigma)}
 
 \inferrule[IF-True]
 {\feval{\cond}{\sigma} }
-{((\IF{\!\cond} S S');S'',\sigma)\!\to\! (S;S'',\sigma)}
+{((\IF{\!\cond} S S');\!S'',\sigma)\!\to\! (S;\!S'',\sigma)}
 \quad~
 \inferrule[IF-False]
 {\neg\feval{\cond}{\sigma} }
-{((\IF{\!\cond} S S');S'',\sigma)\!\to\! (S';S'',\sigma)}
+{((\IF{\!\cond} S S');\!S'',\sigma)\!\to\! (S';\!S'',\sigma)}
     \end{mathpar}
 \end{small}
 \caption{Operational semantics of validity status.}\label{fig:Opsem}
@@ -694,7 +694,7 @@ variable in both address spaces. This is in accordance with VectorPU where each 
 is entirely executed either on a CPU or on a GPU, the formalisation is a bit more 
  generic on this aspect. This is expressed by the following property.
 \begin{Property}[Localised access]\label{prop-localised}
-For a well-declared program containing $\AM\{S\}$, for any $x$, we cannot have $\rem {E\ 
+Consider a well-declared program containing $\AM\{S\}$, for any $x$, we cannot have $\rem {E\ 
 x} \in S$ and $E'\ x \in S$.
 \end{Property}
 \begin{proof}
@@ -1027,6 +1027,7 @@ We consider $\AM$ the set of all access modes declared for a given function and 
 To understand the principle of the approach, consider the case where 
 $W\ \abs x\in \AM$ then $ \forall i\in\range(x). w\ x[i]$ occurs in all execution 
 paths of $S$, and thus for all arrays $y$ overlapping $x$  we must have $(W\ \abs y \in \AM \lor RW\ \abs y \in \AM)$. If we have no additional information we will ensure that $RW\ \abs y$ is also in the set of access mode declarations, which is always safe.
+The extension $\Overlap \AM$ defined below not only contains the original annotations $\AM$ but also the annotations required for coherency of overlapping array. Here if $W\ \abs x\in \AM$ then both $W\ \abs x$ and $RW\ \abs y$ are in  $\Overlap \AM$.
 \end{example}
 
 \begin{definition}[Extension of access mode declarations for overlapping arrays]\label{def-overlap-annotation}

@@ -270,7 +270,7 @@ Here, the access mode specifiers and the resulting coherence policy
  only apply to that particular invocation of \verb-foo-, while other
 invocations of \verb-foo- might use different access mode specifiers.
 
-\begin{example}
+
 The following example shows how to use iterators:
 
 {\footnotesize \begin{verbatim}
@@ -285,7 +285,7 @@ where \verb.std::generate. is a CPU function filling a section between
 two addresses with values (here, random numbers),
 and \verb.thrust::sort. denotes the GPU sorting functionality
 provided by the Nvidia Thrust library. 
-\end{example}
+
 % CK 190926: moved to new subsection 2.1 on pvectors
 % % New 180916 CK:
 % Using iterators, it is possible to define, in VectorPU, references to
@@ -430,7 +430,7 @@ void coherent_on_cpu_rw(){
 }
 \end{verbatim}
 \end{small}
-\end{minipage}\qquad~
+\end{minipage}\quad
 \begin{minipage}{.48\textwidth}
 \begin{small}
 \begin{verbatim}
@@ -509,23 +509,23 @@ where \texttt{vx} refers to a VectorPU \texttt{vector} instance:
 \begin{small}
 \begin{itemize}
  \item \texttt{R(vx)} $\longrightarrow$ 
- \begin{minipage}[t]{0.8\textwidth}
+ \begin{minipage}[t]{0.7\textwidth}
   \texttt{set\_coherence\_state();}\\
   \texttt{return this->std::vector<T>::data();}\\
   \texttt{//casted as const in return value}
  \end{minipage}
  \item \texttt{W(vx)} $\longrightarrow$ 
- \begin{minipage}[t]{0.8\textwidth} \texttt{set\_coherence\_state();}\\
+ \begin{minipage}[t]{0.7\textwidth} \texttt{set\_coherence\_state();}\\
  \texttt{return this->std::vector<T>::data();}
  \end{minipage}
- \item \texttt{GR(vx)} $\longrightarrow$ \begin{minipage}[t]{0.8\textwidth}
+ \item \texttt{GR(vx)} $\longrightarrow$ \begin{minipage}[t]{0.7\textwidth}
  \texttt{set\_coherence\_state();}\\
  \texttt{return thrust::raw\_pointer\_cast(}\\
  \hspace*{1em}\texttt{\& (* thrust::device\_vector<T>::begin() ) );}\\
  \texttt{//casted as const in return value}
  \end{minipage}
  \item \texttt{GW(vx)} $\longrightarrow$ 
-\begin{minipage}[t]{0.8\textwidth} \texttt{set\_coherence\_state();\\ return thrust::raw\_pointer\_cast(}\\
+\begin{minipage}[t]{0.7\textwidth} \texttt{set\_coherence\_state();\\ return thrust::raw\_pointer\_cast(}\\
 \hspace*{1em}\texttt{\& (* thrust::device\_vector<T>::begin() ) );}
 \end{minipage}
 \end{itemize}

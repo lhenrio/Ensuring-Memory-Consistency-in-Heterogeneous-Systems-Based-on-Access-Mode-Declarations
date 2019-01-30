@@ -1,0 +1,26 @@
+Dear Editor, dear reviewers,
+
+Please find enclosed the revision of our submission to JLAMP special issue with 4PAD 2018 selected papers. We improved our article according to the comments made by the
+anonymous reviewers.
+
+We would first like to thank the reviewers for their analysis of our
+paper, and the useful advices they gave us.
+
+We detail below the major changes we made in this revision.All the minor comments have been taken into account in a straightforward manner.
+
+In this new version, you will find the major improvements listed below:
+
+- A revised abstract and clearer contributions in the introduction. cf new abstract
+
+- A significantly extended Section 2 with more details on pvectors and examples of their usages, and additionally a few more informations on implementation. cf Section 2.
+
+- Extended proofs: while not fully exhaustive to keep a reasonable space, proofs have been greatly detailed and all properties have either a detailed sketch proof or a quasi-full proof. cf proofs in Section 3 and 4.
+
+- added examples: examples have been clearly identified, and added at the points where they were missing. See example paragraphs in Sections 3 and 4.
+
+- Section 3.6 have been extended to better discuss what annotations could easily be verified (like R) and what others require a powerful static analysis (like W). Discussion on variables occurring twice, and aliasing has also been extended (at several points in the paper, note that this is also related with overlapping arrays somehow). cf Sec 3.6 and notes on Def 2 in Sec 3.4.
+
+- terminology (effects vs operations) has been clarified and unified. See Sec 3.
+
+Best Regards
+Ludovic Henrio, Christoph Kessler, and Lu Li.
