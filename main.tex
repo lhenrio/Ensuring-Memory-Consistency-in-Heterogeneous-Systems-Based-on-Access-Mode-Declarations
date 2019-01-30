@@ -345,7 +345,7 @@ that are universally quantified in each rule.
  The first %three
  four rules present the 
 evaluation of conditional statements, we assume additional rules exist for evaluating 
-$\oplus$\footnote{We  suppose  that evaluation of $\oplus$ always succeed, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect of the operation $E$ on a variable $x$ updating the validity store, 
+$\oplus$\footnote{We  suppose  that evaluation of $\oplus$ always succeeds, and in particular  variables accessed by the operation are specified as a $r$ operation preceding the condition.}. The next rule applies an effect of the operation $E$ on a variable $x$ updating the validity store, 
 and the \textsc{Remote Effect} rule applies an operation occurring on the distant memory, it 
 applies the symmetric of the effect of the operation to the variable: \emph{validity values are switched compared to the non-remote effect}. Note that \Push\ is the symmetric of 
 \Pull\ and we could have removed one of those two operations without loss of generality: $\Pull$ is the same as $\rem \Push$. 
@@ -848,11 +848,11 @@ for some $X$.
 \end{proof}
 \begin{example}
 Consider the example above of a variable written on the CPU, and then read on the GPU, 
-a well-declared program encoding this behaviour would be:\\
+a well-declared program encoding this behaviour would be:\\[2mm]
 $\begin{array}{l}
 RW~\abs x\{w~x\};\\
 \rem{R~\abs x}\{\rem{r~x}\}
-\end{array}$\\
+\end{array}$\\[1mm]
 This code automatically generates the \Push\ instruction that prevents 
 the program from being stuck, indeed the $RW$ annotation ensures that after executing the first line, the validity status pf $\abs x$ is: $(V,I)$, the encoding of  for $\rem{R~\abs x}$ checks whether the remote status is valid, as it is not the statements: $\Push~x;\Push~\abs x;$ are executed.
 \end{example}

@@ -285,16 +285,17 @@ two addresses with values (here, random numbers),
 and \verb.thrust::sort. denotes the GPU sorting functionality
 provided by the Nvidia Thrust library. 
 
-% New 180916 CK:
-Using iterators, it is possible to define, in VectorPU, references to
-contiguous subranges of a vector,
-called \textit{partial vectors} (\texttt{pvector}s), 
-which can be passed as \texttt{vector}-compatible
-operands to a function instead of an entire \texttt{vector}.
-In this way, it is possible to pass several (disjoint or even
-overlapping) \texttt{pvector} objects as seemingly different \texttt{vector}
-arguments that however are just windows onto
-a common \texttt{vector} container variable. 
+% CK 190926: moved to new subsection 2.1 on pvectors
+% % New 180916 CK:
+% Using iterators, it is possible to define, in VectorPU, references to
+% contiguous subranges of a vector,
+% called \textit{partial vectors} (\texttt{pvector}s), 
+% which can be passed as \texttt{vector}-compatible
+% operands to a function instead of an entire \texttt{vector}.
+% In this way, it is possible to pass several (disjoint or even
+% overlapping) \texttt{pvector} objects as seemingly different \texttt{vector}
+% arguments that however are just windows onto
+% a common \texttt{vector} container variable. 
 
 
 
@@ -311,7 +312,7 @@ a common \texttt{vector} container variable.
 %that can represent a partial range of a normal vector.
 
 % New 180916 CK:
-Using iterators, it is possible to define, in VectorPU, references to
+Using iterators, it is possible in VectorPU to define references to
 contiguous subranges of a vector,
 called \textit{partial vectors} (\texttt{pvector}s), 
 which can be passed as \texttt{vector}-compatible
@@ -342,7 +343,7 @@ from its mother vector.
 \begin{figure}
 \noindent 
 \begin{minipage}{\linewidth}
-\begin{small}
+\begin{footnotesize}% changed from small to have same font size as in other code snippets
 \begin{verbatim}
 struct my_set {
    template <class T>
@@ -354,11 +355,11 @@ vectorpu::pvector<int> vy(x, vx.begin(), vx.begin()+2);
 vectorpu::for_each<int>( GWI(vy), GWEI(vy), my_set() );
 vectorpu::for_each<int>( GWI(vy), GWEI(vy), my_set() );
 SR( vy );  // explicit coherence management
-vectorpu::for_each<int>( RI(vx), REI(vx), [](auto vx) {cout<<x<<" ";} );  
+vectorpu::for_each<int>( RI(vx), REI(vx), [](auto x) {cout<<x<<" ";} );  
 \end{verbatim}
-\end{small}
+\end{footnotesize}
 \end{minipage}
-\caption{\label{fig:pvector}Example of using a partial vector (\texttt{pvector} and the \texttt{SR} macro for explicit coherence management. (Note: \texttt{pvector} is a short form and actually called \texttt{parco\_vector} in the VectorPU API.)}
+\caption{\label{fig:pvector}Example of using a partial vector (\texttt{pvector}) and the \texttt{SR} macro for explicit coherence management. (Note: \texttt{pvector} is a short form and actually called \texttt{parco\_vector} in the VectorPU API.)}
 \end{figure}
 
 % One important point to make this mechanism work is for the case 
@@ -366,9 +367,9 @@ The aliasing introduced by \texttt{pvectors} can lead to coherence problems. One
 programmer intends to operate on the previous \texttt{vector} again after
 some part of it was updated via a \texttt{pvector}, 
 hence the whole \texttt{vector} would be in an inconsistent state.
-In such cases, VectorPU expects the programmer to use a macro \texttt{S$X$} (Synchronize for an access attribute $X$,
+In such cases, VectorPU expects the programmer to use a macro \texttt{S$X$} (\texttt{S}ynchronize for access mode $X$,
 such as \verb.SR. for synchronized read)
-just before the programmers operate on the whole vector again.
+just before the programmer operates on the whole vector again.
 It may be inefficient for a \texttt{pvector} to perform the \texttt{S$X$} synchronization
 automatically, because multiple operations can be performed on the same \texttt{pvector} 
 before accessing the whole \texttt{vector} again, 
@@ -386,7 +387,7 @@ The following two lines change part of \texttt{vy}'s value multiple times. % by 
 %using the functor in Listing~\ref{lst:skeleton_programming}.
 The \texttt{SR} macro explicitly restores coherence for
 \texttt{vy} before the following read access, 
-resulting in a write-back of \texttt{vy} elements
+resulting in a write-back of \texttt{vy} elements in GPU device memory
 to their locations in \texttt{vx},
 % only once for the multiple changes partially, 
 thus also \texttt{vx} as a whole becomes coherent again
@@ -523,7 +524,7 @@ where \texttt{vx} refers to a VectorPU \texttt{vector} instance:
  \texttt{//casted as const in return value}
  \end{minipage}
  \item \texttt{GW(vx)} $\longrightarrow$ 
-\begin{minipage}[t]{0.8\textwidth} \texttt{set\_coherence\_state(); return thrust::raw\_pointer\_cast(}\\
+\begin{minipage}[t]{0.8\textwidth} \texttt{set\_coherence\_state();\\ return thrust::raw\_pointer\_cast(}\\
 \hspace*{1em}\texttt{\& (* thrust::device\_vector<T>::begin() ) );}
 \end{minipage}
 \end{itemize}
